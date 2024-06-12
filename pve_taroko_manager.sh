@@ -149,9 +149,15 @@ EOF
     sshpass -p "$PASSWORD" ssh "$USER"@"$VM_netid.$a" bash /home/"$USER"/alp-kind-env.sh &>> /tmp/pve_vm_manager.log && \
     sshpass -p "$PASSWORD" ssh "$USER"@"$VM_netid.$a" rm /home/"$USER"/alp-kind-env.sh
 
-    printf "${GRN}=====create talos management alp-talos-$z success=====${NC}\n"
+    if [[ "$?" == "0" ]]; then
+      printf "${GRN}=====create talos management alp-talos-$z success=====${NC}\n"
+      printf "${GRN}=====vm alp-talos-$z is rebooting=====${NC}\n"
+    else
+      printf "${RED}=====create talos management alp-talos-$z fail=====${NC}\n"
+      exit 1
+    fi
   fi
-
+  
   printf "${GRN}[Stage: Create Talos ISO]${NC}\n"
 
   for s in $VM_list
@@ -191,7 +197,7 @@ EOF
     --scsi0 ${STORAGE}:vm-"$master_vmid"-disk-0,iothread=1 \
     --ostype l26 \
     --boot order=scsi0 \
-    --agent enabled=1
+    --agent enabled=1 &> /tmp/pve_vm_manager.log
 
     qm resize $master_vmid scsi0 ${DISK}G
     qm start $master_vmid
@@ -208,7 +214,7 @@ EOF
     --scsi0 ${STORAGE}:vm-"$worker1_vmid"-disk-0,iothread=1 \
     --ostype l26 \
     --boot order=scsi0 \
-    --agent enabled=1
+    --agent enabled=1 &> /tmp/pve_vm_manager.log
 
     qm resize $worker1_vmid scsi0 ${DISK}G
     qm start $worker1_vmid
@@ -225,7 +231,7 @@ EOF
     --scsi0 ${STORAGE}:vm-"$worker2_vmid"-disk-0,iothread=1 \
     --ostype l26 \
     --boot order=scsi0 \
-    --agent enabled=1
+    --agent enabled=1 &> /tmp/pve_vm_manager.log
 
     qm resize $worker2_vmid scsi0 ${DISK}G
     qm start $worker2_vmid
