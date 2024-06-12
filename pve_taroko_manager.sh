@@ -72,7 +72,7 @@ check_env() {
   taip1=$(echo $VM_list | cut -d ' ' -f1 | cut -d ':' -f2)
   taip2=$(echo $VM_list | cut -d ' ' -f2 | cut -d ':' -f2)
   taip3=$(echo $VM_list | cut -d ' ' -f3 | cut -d ':' -f2)
-  for ((g=$ipstart;g<=$ipend;g++))
+  for g in $mgip $taip1 $taip2 $taip3
   do
     ping -c 1 -W 1 $VM_netid.$g &>/dev/null
     if [[ "$?" == "0" ]]; then
@@ -81,18 +81,17 @@ check_env() {
   done
 
   ### check command
-  which podman >/dev/null
-  if [[ ! "$?" == "0" ]]; then
-    printf "${RED}=====Please install podman on localhost=====${NC}\n"
-    exit 1
-  else
-    printf "${GRN}=====Check Environment Success=====${NC}\n"
-  fi
   if ! which sshpass &>/dev/null; then
     printf "${RED}=====sshpass command not found,please install on localhost=====${NC}\n"
     exit 1
   fi
 
+  if ! which podman >/dev/null; then
+    printf "${RED}=====Please install podman on localhost=====${NC}\n"
+    exit 1
+  else
+    printf "${GRN}=====Check Environment Success=====${NC}\n"
+  fi
 }
 
 # create VM
@@ -235,7 +234,7 @@ EOF
 
 }
 
-Debug
+#Debug
 source ./setenvVar
 check_env
 create_vm
