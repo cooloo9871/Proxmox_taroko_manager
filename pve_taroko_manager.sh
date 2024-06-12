@@ -47,7 +47,7 @@ check_env() {
   done
 
   ### check os
-  if ! cat /etc/os-release | grep -w ID | grep ubuntu; then
+  if ! cat /etc/os-release | grep -w ID | grep ubuntu &>/dev/null; then
     printf "${RED}Please run on Ubuntu Server 22.04 LTS${NC}\n" && exit 1
   fi
 
