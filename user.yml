@@ -1,0 +1,24 @@
+#cloud-config
+hostname: alpine
+package_update: true
+packages:
+  - nano
+write_files:
+  - path: /etc/resolv.conf
+    permissions: 0644
+    owner: root
+    content: |
+      nameserver NS
+system_info:
+  default_user:
+    name: AC
+#    groups: users
+    lock_passwd: false
+    sudo: ALL=(ALL) NOPASSWD:ALL
+    plain_text_passwd: PW
+    homedir: /home/AC
+    shell: /bin/bash
+ssh_pwauth: True
+# - bootcmd will run on every boot
+#bootcmd:
+#  - echo "hi bigred" > /home/bigred/test
