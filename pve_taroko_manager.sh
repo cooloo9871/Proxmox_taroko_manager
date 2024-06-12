@@ -52,9 +52,11 @@ check_env() {
   fi
 
   ### check vm id
-  idstart=$(echo $VM_id | cut -d '~' -f 1)
-  idend=$(echo $VM_id | cut -d '~' -f 2)
-  for ((f=$idstart;f<=$idend;f++))
+  mgid=$(echo $VM_mgmt | cut -d ':' -f2)
+  taid1=$(echo $VM_list | cut -d ' ' -f1 | cut -d ':' -f3)
+  taid2=$(echo $VM_list | cut -d ' ' -f2 | cut -d ':' -f3)
+  taid3=$(echo $VM_list | cut -d ' ' -f3 | cut -d ':' -f3)
+  for f in $mgid $taid1 $taid2 $taid3
   do
     for c in ${NODE_HOSTNAME[@]}
     do
@@ -66,8 +68,10 @@ check_env() {
   done
 
   ### check vm ip
-  ipstart=$(echo $VM_ip | cut -d '~' -f 1)
-  ipend=$(echo $VM_ip | cut -d '~' -f 2)
+  mgip=$(echo $VM_mgmt | cut -d ':' -f1)
+  taip1=$(echo $VM_list | cut -d ' ' -f1 | cut -d ':' -f2)
+  taip2=$(echo $VM_list | cut -d ' ' -f2 | cut -d ':' -f2)
+  taip3=$(echo $VM_list | cut -d ' ' -f3 | cut -d ':' -f2)
   for ((g=$ipstart;g<=$ipend;g++))
   do
     ping -c 1 -W 1 $VM_netid.$g &>/dev/null
@@ -75,11 +79,6 @@ check_env() {
       printf "${RED}=====$VM_netid.$g VM IP Already used=====${NC}\n" && exit 1
     fi
   done
-
-  ### check ip & id the quantities
-  id_range=$((idend - idstart + 1))
-  ip_range=$((ipend - ipstart + 1))
-  [[ "$id_range" != "$ip_range" ]] && printf "${RED}=====vm id & vm ip discrepancy in quantity=====${NC}\n" && exit 1
 
   ### check command
   which podman >/dev/null
