@@ -284,6 +284,7 @@ stop_vm() {
 
 deploy_vm() {
   mgid=$(echo $VM_mgmt | cut -d ':' -f1)
+  mgip=$(echo $VM_mgmt | cut -d ':' -f1)
   master_vmid=$(echo $VM_list | cut -d ' ' -f1 | cut -d ':' -f2)
   master_ip=$(echo $VM_list | cut -d ' ' -f1 | cut -d ':' -f3)
   worker1_vmid=$(echo $VM_list | cut -d ' ' -f2 | cut -d ':' -f2)
@@ -302,12 +303,20 @@ deploy_vm() {
     printf "${RED}=====alp-tkadm-env.sh file not found=====${NC}\n"
     exit 1
   fi
-  sleep 60
 
-  sshpass -p "$PASSWORD" scp -o "StrictHostKeyChecking no" -o ConnectTimeout=5 ./alp-tkadm-env.sh "$USER"@"$VM_netid.$a":/home/"$USER"/alp-tkadm-env.sh &>> /tmp/pve_vm_manager.log && \
-  sshpass -p "$PASSWORD" ssh "$USER"@"$VM_netid.$a" bash /home/"$USER"/alp-tkadm-env.sh &>> /tmp/pve_vm_manager.log && \
-  sshpass -p "$PASSWORD" ssh "$USER"@"$VM_netid.$a" rm /home/"$USER"/alp-tkadm-env.sh
-
+  for a in $mgid $master_vmid $worker1_vmid $worker2_vmid
+  do
+    if ! ssh -q -o "StrictHostKeyChecking no" root@"$EXECUTE_NODE" qm list | grep "$a" &>/dev/null; then
+      printf "${RED}=====vm $a not found=====${NC}\n"
+      exit 1
+    fi
+  done
+  if [[ "$?" == "0" ]]; then
+    sshpass -p "$PASSWORD" scp -o "StrictHostKeyChecking no" -o ConnectTimeout=5 ./alp-tkadm-env.sh "$USER"@"$VM_netid.$mgip":/home/"$USER"/alp-tkadm-env.sh &>> /tmp/pve_vm_manager.log && \
+    sshpass -p "$PASSWORD" ssh "$USER"@"$VM_netid.$mgip" bash /home/"$USER"/alp-tkadm-env.sh &>> /tmp/pve_vm_manager.log && \
+    sshpass -p "$PASSWORD" ssh "$USER"@"$VM_netid.$mgip" rm /home/"$USER"/alp-tkadm-env.sh
+    printf "${GRN}=====deploy talos management TKAdm-$mgid success=====${NC}\n"
+  fi
   if [[ "$?" == "0" ]]; then
     printf "${GRN}=====create talos management TKAdm-$z success=====${NC}\n"
     printf "${GRN}=====vm TKAdm-$z is rebooting=====${NC}\n"
