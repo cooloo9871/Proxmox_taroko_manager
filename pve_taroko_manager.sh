@@ -364,6 +364,7 @@ else
       source ./setenvVar
       [[ -f /tmp/pve_vm_manager.log ]] && rm /tmp/pve_vm_manager.log
       stop_vm
+    ;;
     deploy)
       Debug
       source ./setenvVar
