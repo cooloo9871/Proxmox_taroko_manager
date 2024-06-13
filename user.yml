@@ -1,5 +1,5 @@
 #cloud-config
-hostname: TKAdm
+hostname: tkadm
 package_update: true
 packages:
   - nano
