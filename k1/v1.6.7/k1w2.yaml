@@ -1,0 +1,92 @@
+version: v1alpha1
+debug: false
+persist: true
+machine:
+    type: worker
+    token: z6nvqp.oas60h7qog4e3270
+    ca:
+        crt: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUJQakNCOGFBREFnRUNBaEJOM21pZitkNGNTTEVUZzlGV3o5TnJNQVVHQXl0bGNEQVFNUTR3REFZRFZRUUsKRXdWMFlXeHZjekFlRncweU5EQXpNall4TXpVNE16VmFGdzB6TkRBek1qUXhNelU0TXpWYU1CQXhEakFNQmdOVgpCQW9UQlhSaGJHOXpNQ293QlFZREsyVndBeUVBSWtNRDFCRUMybFNQdk8xNFhvcVBEQXZCM1RTQWJMV1FJMURHCnJmL2d0MU9qWVRCZk1BNEdBMVVkRHdFQi93UUVBd0lDaERBZEJnTlZIU1VFRmpBVUJnZ3JCZ0VGQlFjREFRWUkKS3dZQkJRVUhBd0l3RHdZRFZSMFRBUUgvQkFVd0F3RUIvekFkQmdOVkhRNEVGZ1FVWEQxSU9IQnIrcUZjWWVOUwo2eDY2eEZuakVTc3dCUVlESzJWd0EwRUE5alBKeUdMcUFsRzQ5MG1TdkJhYWdpbEJ3ajR4K3J5enV6YTBXMTIvCnk4ZjJCOStSeGx0QWhvRndjbFNiNnV3NGZjaktUM2RxV2Eva2trM3pqYzRkRFE9PQotLS0tLUVORCBDRVJUSUZJQ0FURS0tLS0tCg==
+        key: ""
+    certSANs: []
+    kubelet:
+        image: ghcr.io/siderolabs/kubelet:v1.29.3
+        extraArgs:
+            max-pods: "80"
+            rotate-server-certificates: "true"
+        extraMounts:
+            - destination: /var/lib/longhorn
+              type: bind
+              source: /var/lib/longhorn
+              options:
+                - bind
+                - rshared
+                - rw
+        defaultRuntimeSeccompProfileEnabled: true
+        disableManifestsDirectory: true
+    network:
+        hostname: k1w2
+        interfaces:
+            - interface: eth0
+              addresses:
+                - 172.22.1.16/24
+              routes:
+                - network: 0.0.0.0/0
+                  gateway: 172.22.1.254
+        nameservers:
+            - 8.8.8.8
+            - 168.95.1.1
+    install:
+        disk: /dev/sda
+        image: ghcr.io/siderolabs/installer:v1.6.7
+        wipe: false
+    files:
+        - content: |
+            [metrics]
+              address = "0.0.0.0:11234"
+          permissions: 0o0
+          path: /var/cri/conf.d/metrics.toml
+          op: create
+    registries:
+        mirrors:
+            172.22.1.11:5000:
+                endpoints:
+                    - http://172.22.1.11:5000
+        config:
+            172.22.1.11:5000:
+                tls:
+                    insecureSkipVerify: true
+    features:
+        rbac: true
+        stableHostname: true
+        apidCheckExtKeyUsage: true
+        diskQuotaSupport: true
+        kubePrism:
+            enabled: true
+            port: 7445
+    nodeLabels:
+        minio: node
+cluster:
+    id: elaWm-axLXjYShJr1tSsqOQ2HwbIjkfGfpRgcc1Q6Dg=
+    secret: pdbcFS+cJhMUu/vL1qZDsHZnuKcqsPO/TbsntX8Adno=
+    controlPlane:
+        endpoint: https://172.22.1.11:6443
+    network:
+        dnsDomain: k1.org
+        podSubnets:
+            - 10.244.0.0/16
+        serviceSubnets:
+            - 10.98.0.0/24
+    token: zctdpn.yf9hlf67u7cam9vs
+    ca:
+        crt: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUJpVENDQVMrZ0F3SUJBZ0lRZW1RMWtLODZaK2g2dFBaQ3JiWnRlakFLQmdncWhrak9QUVFEQWpBVk1STXcKRVFZRFZRUUtFd3ByZFdKbGNtNWxkR1Z6TUI0WERUSTBNRE15TmpFek5UZ3pOVm9YRFRNME1ETXlOREV6TlRnegpOVm93RlRFVE1CRUdBMVVFQ2hNS2EzVmlaWEp1WlhSbGN6QlpNQk1HQnlxR1NNNDlBZ0VHQ0NxR1NNNDlBd0VICkEwSUFCSkRKNkJWQkFxalhBdWJLOVhJek92NlEzaStVT1BIRmlRa1VXVFA1ZmJPbkJWSnVlR213UUZKYVpDM1oKdW4wZmRTQnZGTCthRm5JbzV5RnRmTjdtUTRLallUQmZNQTRHQTFVZER3RUIvd1FFQXdJQ2hEQWRCZ05WSFNVRQpGakFVQmdnckJnRUZCUWNEQVFZSUt3WUJCUVVIQXdJd0R3WURWUjBUQVFIL0JBVXdBd0VCL3pBZEJnTlZIUTRFCkZnUVVzYzcvbDNzY01FNUdzODZYWUpjWlJlWWNtOWN3Q2dZSUtvWkl6ajBFQXdJRFNBQXdSUUlnWVlleWcvdE0KSG9pMVU3dVJGNit5UUJYbGRMV0VJKzd2dHN6R0Z1RFpMdG9DSVFDZ1RNVWxOdjFkTmtNQkhFWS9mK2J5Q2VpNApoYmhyckxxRmdlVmxUQ0QzY3c9PQotLS0tLUVORCBDRVJUSUZJQ0FURS0tLS0tCg==
+        key: ""
+    proxy:
+        mode: ipvs
+        extraArgs:
+            ipvs-strict-arp: "true"
+    discovery:
+        enabled: true
+        registries:
+            kubernetes:
+                disabled: true
+            service: {}

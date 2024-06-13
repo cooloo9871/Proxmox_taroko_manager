@@ -1,0 +1,185 @@
+version: v1alpha1
+debug: false
+persist: true
+machine:
+    type: controlplane
+    token: z6nvqp.oas60h7qog4e3270
+    ca:
+        crt: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUJQakNCOGFBREFnRUNBaEJOM21pZitkNGNTTEVUZzlGV3o5TnJNQVVHQXl0bGNEQVFNUTR3REFZRFZRUUsKRXdWMFlXeHZjekFlRncweU5EQXpNall4TXpVNE16VmFGdzB6TkRBek1qUXhNelU0TXpWYU1CQXhEakFNQmdOVgpCQW9UQlhSaGJHOXpNQ293QlFZREsyVndBeUVBSWtNRDFCRUMybFNQdk8xNFhvcVBEQXZCM1RTQWJMV1FJMURHCnJmL2d0MU9qWVRCZk1BNEdBMVVkRHdFQi93UUVBd0lDaERBZEJnTlZIU1VFRmpBVUJnZ3JCZ0VGQlFjREFRWUkKS3dZQkJRVUhBd0l3RHdZRFZSMFRBUUgvQkFVd0F3RUIvekFkQmdOVkhRNEVGZ1FVWEQxSU9IQnIrcUZjWWVOUwo2eDY2eEZuakVTc3dCUVlESzJWd0EwRUE5alBKeUdMcUFsRzQ5MG1TdkJhYWdpbEJ3ajR4K3J5enV6YTBXMTIvCnk4ZjJCOStSeGx0QWhvRndjbFNiNnV3NGZjaktUM2RxV2Eva2trM3pqYzRkRFE9PQotLS0tLUVORCBDRVJUSUZJQ0FURS0tLS0tCg==
+        key: LS0tLS1CRUdJTiBFRDI1NTE5IFBSSVZBVEUgS0VZLS0tLS0KTUM0Q0FRQXdCUVlESzJWd0JDSUVJRUgxaU5sWFFrMnZ6ZGFiQ1ZBeGIzK0xLSG9MVU9CM0U2Wll5clUrK1lMRAotLS0tLUVORCBFRDI1NTE5IFBSSVZBVEUgS0VZLS0tLS0K
+    certSANs: []
+    kubelet:
+        image: ghcr.io/siderolabs/kubelet:v1.29.3
+        extraArgs:
+            max-pods: "80"
+            rotate-server-certificates: "true"
+        extraMounts:
+            - destination: /var/lib/longhorn
+              type: bind
+              source: /var/lib/longhorn
+              options:
+                - bind
+                - rshared
+                - rw
+            - destination: /opt/local
+              type: bind
+              source: /opt/local
+              options:
+                - bind
+                - rshared
+                - rw
+        defaultRuntimeSeccompProfileEnabled: true
+        disableManifestsDirectory: true
+    network:
+        hostname: k1m1
+        interfaces:
+            - interface: eth0
+              addresses:
+                - 172.22.1.11/24
+              routes:
+                - network: 0.0.0.0/0
+                  gateway: 172.22.1.254
+        nameservers:
+            - 8.8.8.8
+            - 168.95.1.1
+    install:
+        disk: /dev/sda
+        image: ghcr.io/siderolabs/installer:v1.6.7
+        wipe: false
+    files:
+        - content: |
+            [metrics]
+              address = "0.0.0.0:11234"
+          permissions: 0o0
+          path: /var/cri/conf.d/metrics.toml
+          op: create
+    registries:
+        mirrors:
+            172.22.1.11:5000:
+                endpoints:
+                    - http://172.22.1.11:5000
+        config:
+            172.22.1.11:5000:
+                tls:
+                    insecureSkipVerify: true
+    features:
+        rbac: true
+        stableHostname: true
+        apidCheckExtKeyUsage: true
+        diskQuotaSupport: true
+        kubePrism:
+            enabled: true
+            port: 7445
+    nodeLabels:
+        kadm: node
+cluster:
+    id: elaWm-axLXjYShJr1tSsqOQ2HwbIjkfGfpRgcc1Q6Dg=
+    secret: pdbcFS+cJhMUu/vL1qZDsHZnuKcqsPO/TbsntX8Adno=
+    controlPlane:
+        endpoint: https://172.22.1.11:6443
+    clusterName: k1
+    network:
+        cni:
+            name: custom
+            urls:
+                - https://raw.githubusercontent.com/projectcalico/calico/v3.27.0/manifests/canal.yaml
+        dnsDomain: k1.org
+        podSubnets:
+            - 10.244.0.0/16
+        serviceSubnets:
+            - 10.98.0.0/24
+    token: zctdpn.yf9hlf67u7cam9vs
+    secretboxEncryptionSecret: 7R9ZIZeQgdvw3EX/po66O8se/8WPABlZ5IxIgZNv5QU=
+    ca:
+        crt: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUJpVENDQVMrZ0F3SUJBZ0lRZW1RMWtLODZaK2g2dFBaQ3JiWnRlakFLQmdncWhrak9QUVFEQWpBVk1STXcKRVFZRFZRUUtFd3ByZFdKbGNtNWxkR1Z6TUI0WERUSTBNRE15TmpFek5UZ3pOVm9YRFRNME1ETXlOREV6TlRnegpOVm93RlRFVE1CRUdBMVVFQ2hNS2EzVmlaWEp1WlhSbGN6QlpNQk1HQnlxR1NNNDlBZ0VHQ0NxR1NNNDlBd0VICkEwSUFCSkRKNkJWQkFxalhBdWJLOVhJek92NlEzaStVT1BIRmlRa1VXVFA1ZmJPbkJWSnVlR213UUZKYVpDM1oKdW4wZmRTQnZGTCthRm5JbzV5RnRmTjdtUTRLallUQmZNQTRHQTFVZER3RUIvd1FFQXdJQ2hEQWRCZ05WSFNVRQpGakFVQmdnckJnRUZCUWNEQVFZSUt3WUJCUVVIQXdJd0R3WURWUjBUQVFIL0JBVXdBd0VCL3pBZEJnTlZIUTRFCkZnUVVzYzcvbDNzY01FNUdzODZYWUpjWlJlWWNtOWN3Q2dZSUtvWkl6ajBFQXdJRFNBQXdSUUlnWVlleWcvdE0KSG9pMVU3dVJGNit5UUJYbGRMV0VJKzd2dHN6R0Z1RFpMdG9DSVFDZ1RNVWxOdjFkTmtNQkhFWS9mK2J5Q2VpNApoYmhyckxxRmdlVmxUQ0QzY3c9PQotLS0tLUVORCBDRVJUSUZJQ0FURS0tLS0tCg==
+        key: LS0tLS1CRUdJTiBFQyBQUklWQVRFIEtFWS0tLS0tCk1IY0NBUUVFSURNYkhtcDB6Ly9QUkF2S09TNnBOU1RXeDdBMVZNRzRvME1JdzhGOHJYNmJvQW9HQ0NxR1NNNDkKQXdFSG9VUURRZ0FFa01ub0ZVRUNxTmNDNXNyMWNqTTYvcERlTDVRNDhjV0pDUlJaTS9sOXM2Y0ZVbTU0YWJCQQpVbHBrTGRtNmZSOTFJRzhVdjVvV2Npam5JVzE4M3VaRGdnPT0KLS0tLS1FTkQgRUMgUFJJVkFURSBLRVktLS0tLQo=
+    aggregatorCA:
+        crt: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUJZRENDQVFhZ0F3SUJBZ0lSQU9hbmxOVUtvVjZFR2RiTjJMWWwvTXN3Q2dZSUtvWkl6ajBFQXdJd0FEQWUKRncweU5EQXpNall4TXpVNE16VmFGdzB6TkRBek1qUXhNelU0TXpWYU1BQXdXVEFUQmdjcWhrak9QUUlCQmdncQpoa2pPUFFNQkJ3TkNBQVJLdmE4NU0vZEYvT0JrQUs3M1JPaXpOR3lVNUFqSzJZZnh1TGEyQ0pqVGc3T1A0aGdiCjNydzBuVlBYQUtiSzRzU2l3bVBiMk9tbTZjclBwM0lrd1lzd28yRXdYekFPQmdOVkhROEJBZjhFQkFNQ0FvUXcKSFFZRFZSMGxCQll3RkFZSUt3WUJCUVVIQXdFR0NDc0dBUVVGQndNQ01BOEdBMVVkRXdFQi93UUZNQU1CQWY4dwpIUVlEVlIwT0JCWUVGSXVGOTd6VGoxTFh1OWY0dW5OZ3B2MjZGOGYrTUFvR0NDcUdTTTQ5QkFNQ0EwZ0FNRVVDCklHNXNwSkxOVGpmczM5WTZITzRjaEVaSG9OOXorcll0dTJLejRqeHNuRXR6QWlFQXROS1JiMkFtRGljRXBnODgKOG5OQ25ENVlUeDQ4a2FKR2ptMEtuSTcvWHo0PQotLS0tLUVORCBDRVJUSUZJQ0FURS0tLS0tCg==
+        key: LS0tLS1CRUdJTiBFQyBQUklWQVRFIEtFWS0tLS0tCk1IY0NBUUVFSUN3SmdGa2dNZnphWEFPM0tPMVc0Q2F2RFdpMFlHazIyYklMMXgxcUNVUHNvQW9HQ0NxR1NNNDkKQXdFSG9VUURRZ0FFU3Iydk9UUDNSZnpnWkFDdTkwVG9zelJzbE9RSXl0bUg4YmkydGdpWTA0T3pqK0lZRzk2OApOSjFUMXdDbXl1TEVvc0pqMjlqcHB1bkt6NmR5Sk1HTE1BPT0KLS0tLS1FTkQgRUMgUFJJVkFURSBLRVktLS0tLQo=
+    serviceAccount:
+        key: LS0tLS1CRUdJTiBFQyBQUklWQVRFIEtFWS0tLS0tCk1IY0NBUUVFSURESTlKcGY0aFJpTTJqcTVHVTROeUU1aXdsVEpyUnZIN00rL1NLaVdXcmFvQW9HQ0NxR1NNNDkKQXdFSG9VUURRZ0FFZEhBVUNTWTdiaXZxZFpzOXZWMnBTZFh5NWttbUVzVW9QU0xnaW9Yd1c3STZnK2I2cTMxNwpnWUNudmNBVmtOSzBYNFBaRzZvQXpEbUEzVnp4aHMxaG1BPT0KLS0tLS1FTkQgRUMgUFJJVkFURSBLRVktLS0tLQo=
+    apiServer:
+        image: registry.k8s.io/kube-apiserver:v1.29.3
+        certSANs:
+            - 172.22.1.11
+        disablePodSecurityPolicy: true
+        auditPolicy:
+            apiVersion: audit.k8s.io/v1
+            kind: Policy
+            rules:
+                - level: Metadata
+    controllerManager:
+        image: registry.k8s.io/kube-controller-manager:v1.29.3
+    proxy:
+        image: registry.k8s.io/kube-proxy:v1.29.3
+        mode: ipvs
+        extraArgs:
+            ipvs-strict-arp: "true"
+    scheduler:
+        image: registry.k8s.io/kube-scheduler:v1.29.3
+    discovery:
+        enabled: true
+        registries:
+            kubernetes:
+                disabled: true
+            service: {}
+    etcd:
+        ca:
+            crt: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUJmVENDQVNPZ0F3SUJBZ0lRRnVKYXF0ZnZmU2YwTmt6UzVucUd1ekFLQmdncWhrak9QUVFEQWpBUE1RMHcKQ3dZRFZRUUtFd1JsZEdOa01CNFhEVEkwTURNeU5qRXpOVGd6TlZvWERUTTBNRE15TkRFek5UZ3pOVm93RHpFTgpNQXNHQTFVRUNoTUVaWFJqWkRCWk1CTUdCeXFHU000OUFnRUdDQ3FHU000OUF3RUhBMElBQk1pRDAxMUtQQ0VBClBwRURSdEcyN0Njalh2Y3Z1UHQrMlJ2OXVwMUVvbE9odW9TQ29rR2ZYTzA4VlAzNERmVFl5dy9YN1lnWGU3bloKSHZ3SGlSQkhMZGVqWVRCZk1BNEdBMVVkRHdFQi93UUVBd0lDaERBZEJnTlZIU1VFRmpBVUJnZ3JCZ0VGQlFjRApBUVlJS3dZQkJRVUhBd0l3RHdZRFZSMFRBUUgvQkFVd0F3RUIvekFkQmdOVkhRNEVGZ1FVbytZUWF4OElRVkF5CkpjRVFsU0Q1UDJ2K1R4WXdDZ1lJS29aSXpqMEVBd0lEU0FBd1JRSWdjOVpRZjBHdWpzRTVVYVd5MEZpVnJvRHEKc0pJUlVDUTVkWHFEemI2UGE2WUNJUUNQVU1HWmlUTHNwZHhiR0wxRmdYOXJiWE9ldklTSzVMZThNUGV3RExZRwozQT09Ci0tLS0tRU5EIENFUlRJRklDQVRFLS0tLS0K
+            key: LS0tLS1CRUdJTiBFQyBQUklWQVRFIEtFWS0tLS0tCk1IY0NBUUVFSUNCakQzZkE2NUdsdnJxM0JXSld4YU9rUVBRdlRDWDYxWVNpc0Q1YTJ6VzNvQW9HQ0NxR1NNNDkKQXdFSG9VUURRZ0FFeUlQVFhVbzhJUUEra1FORzBiYnNKeU5lOXkrNCszN1pHLzI2blVTaVU2RzZoSUtpUVo5Ywo3VHhVL2ZnTjlOakxEOWZ0aUJkN3Vka2UvQWVKRUVjdDF3PT0KLS0tLS1FTkQgRUMgUFJJVkFURSBLRVktLS0tLQo=
+    extraManifests:
+        - https://raw.githubusercontent.com/metallb/metallb/v0.14.3/config/manifests/metallb-native.yaml
+        - http://www.oc99.org/wk/kadm/kube-mlb-config.yaml
+        - https://raw.githubusercontent.com/alex1989hu/kubelet-serving-cert-approver/main/deploy/standalone-install.yaml
+        - https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
+    inlineManifests:
+        - name: namespace-longhorn-system
+          contents: |-
+            apiVersion: v1
+            kind: Namespace
+            metadata:
+               name: longhorn-system
+        - name: namespace-argo
+          contents: |-
+            apiVersion: v1
+            kind: Namespace
+            metadata:
+               name: argo
+        - name: namespace-jenkins
+          contents: |-
+            apiVersion: v1
+            kind: Namespace
+            metadata:
+               name: jenkins
+        - name: namespace-wp
+          contents: |-
+            apiVersion: v1
+            kind: Namespace
+            metadata:
+               name: wp
+        - name: namespace-ndb
+          contents: |-
+            apiVersion: v1
+            kind: Namespace
+            metadata:
+               name: ndb
+        - name: namespace-argocd
+          contents: |-
+            apiVersion: v1
+            kind: Namespace
+            metadata:
+               name: argocd
+        - name: CRB-argons
+          contents: |-
+            apiVersion: rbac.authorization.k8s.io/v1
+            kind: ClusterRoleBinding
+            metadata:
+              name: RBC-argons
+            roleRef:
+              apiGroup: rbac.authorization.k8s.io
+              kind: ClusterRole
+              name: cluster-admin
+            subjects:
+              - kind: ServiceAccount
+                name: default
+                namespace: argo

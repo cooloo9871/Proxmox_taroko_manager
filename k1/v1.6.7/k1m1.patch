@@ -1,0 +1,124 @@
+machine:
+  kubelet:
+        extraArgs:
+          rotate-server-certificates: true
+          max-pods: 80
+        extraMounts:
+          - destination: /var/lib/longhorn
+            type: bind
+            source: /var/lib/longhorn
+            options:
+              - bind
+              - rshared
+              - rw
+          - destination: /opt/local
+            type: bind
+            source: /opt/local
+            options:
+              - bind
+              - rshared
+              - rw
+  nodeLabels:
+    kadm: node
+  files:
+      - content: |
+          [metrics]
+            address = "0.0.0.0:11234"
+        path: /var/cri/conf.d/metrics.toml
+        op: create
+  network:
+    hostname: k1m1
+    interfaces:
+      - interface: eth0 
+        addresses:
+          - 172.22.1.11/24
+        routes:
+          - network: 0.0.0.0/0 
+            gateway: 172.22.1.254 
+    nameservers:
+     - 8.8.8.8
+     - 168.95.1.1
+
+  registries:
+    mirrors:
+      "172.22.1.11:5000":
+         endpoints:
+           - http://172.22.1.11:5000
+    config:
+      "172.22.1.11:5000":
+          tls:
+             insecureSkipVerify: true
+
+cluster:
+    clusterName: k1 
+    network:
+        dnsDomain: k1.org 
+        podSubnets:
+            - 10.244.0.0/16
+        serviceSubnets:
+            - 10.98.0.0/24
+        cni:
+          name: custom 
+          urls:
+          - https://raw.githubusercontent.com/projectcalico/calico/v3.27.0/manifests/canal.yaml
+    proxy:
+      mode: ipvs
+      extraArgs:
+          ipvs-strict-arp: true
+    extraManifests:
+      - https://raw.githubusercontent.com/metallb/metallb/v0.14.3/config/manifests/metallb-native.yaml
+      - http://www.oc99.org/wk/kadm/kube-mlb-config.yaml
+      - https://raw.githubusercontent.com/alex1989hu/kubelet-serving-cert-approver/main/deploy/standalone-install.yaml
+      - https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
+#      - http://www.oc99.org/wk/kadm/kube-kadm-dkreg.yaml
+    inlineManifests:
+      - name: namespace-longhorn-system
+        contents: |-
+          apiVersion: v1
+          kind: Namespace
+          metadata:
+             name: longhorn-system
+      - name: namespace-argo
+        contents: |-
+          apiVersion: v1
+          kind: Namespace
+          metadata:
+             name: argo
+      - name: namespace-jenkins
+        contents: |-
+          apiVersion: v1
+          kind: Namespace
+          metadata:
+             name: jenkins
+      - name: namespace-wp
+        contents: |-
+          apiVersion: v1
+          kind: Namespace
+          metadata:
+             name: wp
+      - name: namespace-ndb
+        contents: |-
+          apiVersion: v1
+          kind: Namespace
+          metadata:
+             name: ndb
+      - name: namespace-argocd
+        contents: |-
+          apiVersion: v1
+          kind: Namespace
+          metadata:
+             name: argocd
+      - name: CRB-argons
+        contents: |-
+          apiVersion: rbac.authorization.k8s.io/v1
+          kind: ClusterRoleBinding
+          metadata:
+            name: RBC-argons
+          roleRef:
+            apiGroup: rbac.authorization.k8s.io
+            kind: ClusterRole
+            name: cluster-admin
+          subjects:
+            - kind: ServiceAccount
+              name: default
+              namespace: argo
