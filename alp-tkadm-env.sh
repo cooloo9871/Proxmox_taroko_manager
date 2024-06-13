@@ -48,14 +48,32 @@ ips=\$(ifconfig \$GWIF | grep 'inet ')
 export IP=\$(echo \$ips | cut -d' ' -f2 | cut -d':' -f2)
 export NETID=\${IP%.*}
 export GW=\$(route -n | grep -e '^0.0.0.0' | tr -s \ - | cut -d ' ' -f2)
-export PATH="/home/bigred/bin:/home/bigred/kind/bin:\$PATH"
+export PATH="/home/bigred/bin:/home/bigred/dt/bin:\$PATH"
 # source /home/bigred/bin/myk3s
 clear && sleep 2
-echo "Welcome to Alpine Linux : `cat /etc/alpine-release`"
+echo "Welcome to Talos Admin Console (Alpine Linux : `cat /etc/alpine-release`)"
 [ "\$IP" != "" ] && echo "IP : \$IP"
 echo ""
 
-export PS1="[\${STY#*.}]\u@\h:\w\$ "
+#if [ "\$USER" == "bigred" ]; then
+  # change hostname & set IP
+  # sudo /home/bigred/bin/chnameip
+
+  # create join k3s command
+  #which kubectl &>/dev/null
+  #if [ "\$?" == "0" ]; then
+  #   if [ -z "\$SSH_TTY" ]; then
+  #      echo "Kubernetes Starting, pls wait 30 sec" && sleep 30
+  #      kubectl get nodes 2>/dev/null | grep master | grep `hostname` &>/dev/null
+  #      if [ "\$?" == "0" ]; then
+  #         echo "sudo curl -sfL https://get.k3s.io | K3S_URL=https://\$IP:6443 K3S_TOKEN=`sudo cat /var/lib/rancher/k3s/server/node-token` K3S_KUBECONFIG_MODE='644' sh - && sudo reboot" > /home/bigred/bin/joink3s
+  #         chmod +x /home/bigred/bin/joink3s
+  #      fi
+  #   fi
+  #fi
+#fi
+
+export PS1="[\\${STY#*.}]\u@\h:\w\$ "
 alias ping='ping -c 4 '
 alias pingdup='sudo arping -D -I eth0 -c 2 '
 alias dir='ls -alh '
@@ -66,27 +84,37 @@ alias ka='kubectl apply'
 alias kd='kubectl delete'
 alias kc='kubectl create'
 alias ks='kubectl get pods -n kube-system'
+alias kt='kubectl top'
+alias kk='kubectl krew'
 alias docker='sudo podman'
-alias pc='sudo podman system prune -a -f'
+alias kp="kubectl get pods -o wide -A | sed 's/(.*)//' | tr -s ' ' | cut -d ' ' -f 1-4,7,8 | column -t"
 alias vms='sudo /usr/bin/vmware-toolbox-cmd disk shrink /'
+alias dsize='sudo du -sh -- /* | sort -rh'
+alias pc='sudo podman system prune -a -f'
+alias t2m='mc cp -r /home/bigred/wulin/* mios/kadm/'
 
 # /etc/local.d/rc.local.start (相當於 rc.local) create /tmp/sinfo
 if [ -z "\$SSH_TTY" ]; then
-   [ -f /tmp/sinfo ] && dialog --title " Cloud Native Trainer " --textbox /tmp/sinfo 24 85; clear
+   [ -f /tmp/sinfo ] && dialog --title " Talos Admin Console " --textbox /tmp/sinfo 24 85; clear
+fi
+export KUBE_EDITOR='nano'
+export TALOSCONFIG=/home/bigred/k1/v1.6.7/talosconfig
+export PATH=/home/bigred/wulin/bin:/home/bigred/k1:/home/bigred/.krew/bin:\$PATH
+
+mc config host ls | grep mios &>/dev/null
+if [ "\$?" != "0" ]; then
+   mc config host add mios http://172.22.1.150:9000 minio minio123 &>/dev/null
+   [ "\$?" == "0" ] && echo "mios ok"
 fi
 
-export KIND_EXPERIMENTAL_PROVIDER='podman kind create cluster'
+# What is the difference between /tmp and /var/tmp?
+# https://unix.stackexchange.com/questions/30489/what-is-the-difference-between-tmp-and-var-tmp
+sudo rm -r /tmp/* &>/dev/null
+sudo rm -r /var/tmp/* &>/dev/null
 EOF
 
 cat <<EOF | sudo tee /etc/local.d/rc.local.start
 #!/bin/bash
-gw=\$(route -n | grep -e "^0.0.0.0 ")
-export GWIF=\${gw##* }
-ips=\$(ifconfig \$GWIF | grep 'inet ')
-export IP=\$(echo \$ips | cut -d' ' -f2 | cut -d':' -f2)
-export NETID=\${IP%.*}
-export GW=\$(route -n | grep -e '^0.0.0.0' | tr -s \ - | cut -d ' ' -f2)
-
 echo "[System]" > /tmp/sinfo
 echo "Hostname : `hostname`" >> /tmp/sinfo
 
@@ -101,13 +129,20 @@ m=\$(df -h | grep /dev/sda)
 ds=\$(echo \$m | cut -d ' ' -f2)
 echo "Disk : \$ds" >> /tmp/sinfo
 
-kubectl get no &>/dev/null
+which kubectl &>/dev/null
 if [ "\$?" == "0" ]; then
    #v=\$(kubectl version --short | head -n 1 | cut -d ":" -f2 | tr -d ' ')
    echo "Kubernetes: enabled" >> /tmp/sinfo
 fi
 
 echo "" >> /tmp/sinfo
+
+gw=\$(route -n | grep -e "^0.0.0.0 ")
+export GWIF=\${gw##* }
+ips=\$(ifconfig \$GWIF | grep 'inet ')
+export IP=\$(echo \$ips | cut -d' ' -f2 | cut -d':' -f2)
+export NETID=\${IP%.*}
+export GW=\$(route -n | grep -e '^0.0.0.0' | tr -s \ - | cut -d ' ' -f2)
 
 echo "[Network]" >> /tmp/sinfo
 echo "IP : \$IP" >> /tmp/sinfo
@@ -122,10 +157,6 @@ modprobe fuse
 mount --make-rshared /
 modprobe br_netfilter
 modprobe ip_tables
-modprobe ip_vs
-modprobe ip_vs_rr
-modprobe ip_vs_wrr
-modprobe ip_vs_sh
 EOF
 
 sudo chmod +x /etc/local.d/rc.local.start
