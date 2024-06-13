@@ -1,7 +1,6 @@
 #cloud-config
 hostname: TKAdm
 package_update: true
-package_upgrade: true
 packages:
   - nano
 write_files:
