@@ -326,6 +326,38 @@ deploy_vm() {
   fi
 }
 
+delete_vm() {
+  mgid=$(echo $VM_mgmt | cut -d ':' -f1)
+  master_name=$(echo $VM_list | cut -d ' ' -f1 | cut -d ':' -f1)
+  master_vmid=$(echo $VM_list | cut -d ' ' -f1 | cut -d ':' -f2)
+  master_ip=$(echo $VM_list | cut -d ' ' -f1 | cut -d ':' -f3)
+  worker1_name=$(echo $VM_list | cut -d ' ' -f2 | cut -d ':' -f1)
+  worker1_vmid=$(echo $VM_list | cut -d ' ' -f2 | cut -d ':' -f2)
+  worker1_ip=$(echo $VM_list | cut -d ' ' -f2 | cut -d ':' -f3)
+  worker2_name=$(echo $VM_list | cut -d ' ' -f3 | cut -d ':' -f1)
+  worker2_vmid=$(echo $VM_list | cut -d ' ' -f3 | cut -d ':' -f2)
+  worker2_ip=$(echo $VM_list | cut -d ' ' -f3 | cut -d ':' -f3)
+  printf "${GRN}[Stage: Delete VM]${NC}\n"
+  for h in $mgid $master_vmid $worker1_vmid $worker2_vmid
+  do
+    if ! ssh -q -o "StrictHostKeyChecking no" root@"$EXECUTE_NODE" qm list | grep "$h" &>/dev/null; then
+      printf "${RED}=====vm $h not found=====${NC}\n"
+    elif ssh root@"$EXECUTE_NODE" qm list | grep "$h" | grep running &>/dev/null; then
+      printf "${RED}=====stop vm $h first=====${NC}\n"
+    else
+      ssh root@"$EXECUTE_NODE" qm destroy "$h" &>> /tmp/pve_vm_manager.log
+      printf "${GRN}=====delete vm $h completed=====${NC}\n"
+    fi
+  done
+  [[ -f /tmp/pve_execute_command.log ]] && rm /tmp/pve_execute_command.log && printf "${GRN}=====delete /tmp/pve_execute_command.log completed=====${NC}\n"
+  [[ -f /tmp/pve_vm_manager.log ]] && rm /tmp/pve_vm_manager.log && printf "${GRN}=====delete /tmp/pve_vm_manager.log completed=====${NC}\n"
+  ssh root@"$EXECUTE_NODE" rm /var/vmimg/nocloud_alpine-3.19.1-x86_64-bios-cloudinit-r0.qcow2 &>/dev/null && printf "${GRN}=====delete nocloud_alpine-3.19.1-x86_64-bios-cloudinit-r0.qcow2 completed=====${NC}\n"
+  ssh root@"$EXECUTE_NODE" rm /var/vmimg/talos-$master_name.$master_ip.raw /var/vmimg/talos-$worker1_name.$worker1_ip.raw /var/vmimg/talos-$worker2_name.$worker2_ip.raw &>/dev/null && \
+  printf "${GRN}=====delete /var/vmimg/talos-$master_name.$master_ip.raw completed=====${NC}\n"
+  printf "${GRN}=====delete /var/vmimg/talos-$worker1_name.$worker1_ip.raw completed=====${NC}\n"
+  printf "${GRN}=====delete /var/vmimg/talos-$worker2_name.$worker2_ip.raw completed=====${NC}\n"
+}
+
 help() {
   cat <<EOF
 Usage: pve_taroko_manager.sh [OPTIONS]
@@ -370,6 +402,11 @@ else
       source ./setenvVar
       [[ -f /tmp/pve_vm_manager.log ]] && rm /tmp/pve_vm_manager.log
       deploy_vm
+    ;;
+    delete)
+      source ./setenvVar
+      [[ -f /tmp/pve_vm_manager.log ]] && rm /tmp/pve_vm_manager.log
+      delete_vm
     ;;
     logs)
       log_vm
