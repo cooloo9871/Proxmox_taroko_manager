@@ -52,10 +52,10 @@ check_env() {
   fi
 
   ### check vm id
-  mgid=$(echo $VM_mgmt | cut -d ':' -f2)
-  taid1=$(echo $VM_list | cut -d ' ' -f1 | cut -d ':' -f3)
-  taid2=$(echo $VM_list | cut -d ' ' -f2 | cut -d ':' -f3)
-  taid3=$(echo $VM_list | cut -d ' ' -f3 | cut -d ':' -f3)
+  mgid=$(echo $VM_mgmt | cut -d ':' -f1)
+  taid1=$(echo $VM_list | cut -d ' ' -f1 | cut -d ':' -f2)
+  taid2=$(echo $VM_list | cut -d ' ' -f2 | cut -d ':' -f2)
+  taid3=$(echo $VM_list | cut -d ' ' -f3 | cut -d ':' -f2)
   for f in $mgid $taid1 $taid2 $taid3
   do
     for c in ${NODE_HOSTNAME[@]}
@@ -81,8 +81,9 @@ check_env() {
   done
 
   ### check command
-  if ! which sshpass &>/dev/null; then
-    printf "${RED}=====sshpass command not found,please install on localhost=====${NC}\n"
+  if ! ssh -q root@"$EXECUTE_NODE" which virt-customize >/dev/null; then
+    printf "${RED}=====Please install virt-customize on $EXECUTE_NODE=====${NC}\n"
+    printf "${YEL}=====Run this command on $EXECUTE_NODE: sudo apt install -y libguestfs-tools=====${NC}\n"
     exit 1
   fi
 
@@ -113,10 +114,11 @@ create_vm() {
       virt-customize --install qemu-guest-agent,bash,sudo -a /var/vmimg/nocloud_alpine-3.19.1-x86_64-bios-cloudinit-r0.qcow2
     fi
 EOF
+
+  z=$(echo $VM_mgmt | cut -d ':' -f1)
+  a=$(echo $VM_mgmt | cut -d ':' -f2)
   if [[ "$?" == '0' ]]; then
-    z=$(echo $VM_mgmt | cut -d ':' -f1)
-    a=$(echo $VM_mgmt | cut -d ':' -f2)
-    ssh root@"$EXECUTE_NODE" "qm create $z --name alp-talos-$z --memory $MEM --sockets $CPU_socket --cores $CPU_core --cpu $CPU_type --net0 virtio,bridge=$Network_device" &>> /tmp/pve_vm_manager.log
+    ssh root@"$EXECUTE_NODE" "qm create $z --name TKAdm-$z --memory $MEM --sockets $CPU_socket --cores $CPU_core --cpu $CPU_type --net0 virtio,bridge=$Network_device" &>> /tmp/pve_vm_manager.log
     ssh root@"$EXECUTE_NODE" "qm importdisk $z /var/vmimg/nocloud_alpine-3.19.1-x86_64-bios-cloudinit-r0.qcow2 ${STORAGE}" &>> /tmp/pve_vm_manager.log
     ssh root@"$EXECUTE_NODE" "qm set $z --scsihw virtio-scsi-pci --scsi0 ${STORAGE}:vm-$z-disk-0" &>> /tmp/pve_vm_manager.log
     ssh root@"$EXECUTE_NODE" "qm resize $z scsi0 ${DISK}G" &>> /tmp/pve_vm_manager.log
@@ -136,44 +138,34 @@ EOF
     ssh root@"$EXECUTE_NODE" sed -i "s/gw/$GATEWAY/g" "/var/lib/vz/snippets/network$a.yml" &>> /tmp/pve_vm_manager.log
 
     ssh root@"$EXECUTE_NODE" qm set "$z" --cicustom "user=local:snippets/user$z.yml,network=local:snippets/network$a.yml" &>> /tmp/pve_vm_manager.log
-    ssh root@"$EXECUTE_NODE" qm start "$z"
 
-    ### check alp-kind-env.sh file
-    if [[ ! -f ./alp-kind-env.sh ]]; then
-      printf "${RED}=====alp-kind-env.sh file not found=====${NC}\n"
-      exit 1
-    fi
-    sleep 60
-
-    sshpass -p "$PASSWORD" scp -o "StrictHostKeyChecking no" -o ConnectTimeout=5 ./alp-kind-env.sh "$USER"@"$VM_netid.$a":/home/"$USER"/alp-kind-env.sh &>> /tmp/pve_vm_manager.log && \
-    sshpass -p "$PASSWORD" ssh "$USER"@"$VM_netid.$a" bash /home/"$USER"/alp-kind-env.sh &>> /tmp/pve_vm_manager.log && \
-    sshpass -p "$PASSWORD" ssh "$USER"@"$VM_netid.$a" rm /home/"$USER"/alp-kind-env.sh
-
-    if [[ "$?" == "0" ]]; then
-      printf "${GRN}=====create talos management alp-talos-$z success=====${NC}\n"
-      printf "${GRN}=====vm alp-talos-$z is rebooting=====${NC}\n"
-    else
-      printf "${RED}=====create talos management alp-talos-$z fail=====${NC}\n"
-      exit 1
-    fi
+    printf "${GRN}=====create talos management TKAdm-$z success=====${NC}\n"
+  else
+    printf "${RED}=====create talos management TKAdm-$z fail=====${NC}\n"
+    exit 1
   fi
-  
-  printf "${GRN}[Stage: Create Talos ISO]${NC}\n"
+
+  printf "${GRN}[Stage: Create Talos RAW Disk]${NC}\n"
 
   for s in $VM_list
   do
-    ip=$(echo $VM_list | cut -d ':' -f3)
-    hostname=$(echo $VM_list | cut -d ':' -f1)
+    ip=$(echo $s | cut -d ' ' -f1 | cut -d ':' -f3)
+    hostname=$(echo $s | cut -d ':' -f1)
     sudo podman run --rm -t -v $PWD/out:/out  -v /dev:/dev --privileged ghcr.io/siderolabs/imager:"$Talos_OS_Version" metal \
     --system-extension-image ghcr.io/siderolabs/qemu-guest-agent:"$Qemu_Agent_Version" \
-    --extra-kernel-arg "ip=$VM_netid.$ip::$GATEWAY:$NETMASK:$hostname:eth0:off:$NAMESERVER net.ifnames=0"
+    --extra-kernel-arg "ip=$VM_netid.$ip::$GATEWAY:$NETMASK:$hostname:eth0:off:$NAMESERVER net.ifnames=0" &>> /tmp/pve_vm_manager.log
 
-    sudo chown -R $(id -u):$(id -g) out
-    xz -v -d $PWD/out/metal-amd64.raw.xz
-    mv $PWD/out/metal-amd64.raw $PWD/out/talos-$hostname.$ip.raw
+    sudo chown -R $(id -u):$(id -g) out &>> /tmp/pve_vm_manager.log
+    xz -v -d $PWD/out/metal-amd64.raw.xz &>> /tmp/pve_vm_manager.log
+    mv $PWD/out/metal-amd64.raw $PWD/out/talos-$hostname.$ip.raw &>> /tmp/pve_vm_manager.log
 
-    scp $PWD/out/talos-$vn.$ip.raw root@$NODE_1_IP:/var/vmimg/
-    printf "${GRN}=====talos-$vn.$ip.raw Create Success=====${NC}\n"
+    scp -q $PWD/out/talos-$hostname.$ip.raw root@$EXECUTE_NODE:/var/vmimg/ &>> /tmp/pve_vm_manager.log
+    if [[ "$?" == '0' ]]; then
+      printf "${GRN}=====talos-$hostname.$ip.raw create success=====${NC}\n"
+    else
+      printf "${RED}=====talos-$hostname.$ip.raw create fail=====${NC}\n"
+      exit 1
+    fi
   done
 
   printf "${GRN}=====[Stage: Create Talos VM]=====${NC}\n"
@@ -188,6 +180,8 @@ EOF
   worker2_ip=$(echo $VM_list | cut -d ' ' -f3 | cut -d ':' -f3)
 
   ssh root@"$EXECUTE_NODE" /bin/bash << EOF &>> /tmp/pve_vm_manager.log
+    qm create $master_vmid && \
+    qm importdisk $master_vmid /var/vmimg/talos-$master_name.$master_ip.raw ${STORAGE} && \
     qm set $master_vmid \
     --name $master_name \
     --cpu $CPU_type --cores $CPU_core --sockets $CPU_socket \
@@ -197,31 +191,28 @@ EOF
     --scsi0 ${STORAGE}:vm-"$master_vmid"-disk-0,iothread=1 \
     --ostype l26 \
     --boot order=scsi0 \
-    --agent enabled=1 &> /tmp/pve_vm_manager.log
-
+    --agent enabled=1 && \
     qm resize $master_vmid scsi0 ${DISK}G
-    qm start $master_vmid
 EOF
-  [[ "$?" == "0" ]] && printf "${GRN}=====Create $master_vmid success=====${NC}\n"
 
+  [[ "$?" == "0" ]] && printf "${GRN}=====Create $master_vmid success=====${NC}\n"
   ssh root@"$EXECUTE_NODE" /bin/bash << EOF &>> /tmp/pve_vm_manager.log
-    qm set $worker1_vmid \
-    --name $worker1_name \
-    --cpu $CPU_type --cores $CPU_core --sockets $CPU_socket \
-    --memory $MEM \
+    qm create $worker1_vmid && \
+    qm importdisk $worker1_vmid /var/vmimg/talos-$worker1_name.$worker1_ip.raw ${STORAGE} && \
+    qm set $worker1_vmid --name $worker1_name --cpu $CPU_type --cores $CPU_core --sockets $CPU_socket --memory $MEM \
     --net0 bridge="$Network_device",virtio,firewall=1 \
     --scsihw virtio-scsi-single \
     --scsi0 ${STORAGE}:vm-"$worker1_vmid"-disk-0,iothread=1 \
     --ostype l26 \
     --boot order=scsi0 \
-    --agent enabled=1 &> /tmp/pve_vm_manager.log
-
+    --agent enabled=1 && \
     qm resize $worker1_vmid scsi0 ${DISK}G
-    qm start $worker1_vmid
 EOF
-  [[ "$?" == "0" ]] && printf "${GRN}=====Create $worker1_vmid success=====${NC}\n"
 
+  [[ "$?" == "0" ]] && printf "${GRN}=====Create $worker1_vmid success=====${NC}\n"
   ssh root@"$EXECUTE_NODE" /bin/bash << EOF &>> /tmp/pve_vm_manager.log
+    qm create $worker2_vmid && \
+    qm importdisk $worker2_vmid /var/vmimg/talos-$worker2_name.$worker2_ip.raw ${STORAGE} && \
     qm set $worker2_vmid \
     --name $worker2_name \
     --cpu $CPU_type --cores $CPU_core --sockets $CPU_socket \
@@ -231,16 +222,153 @@ EOF
     --scsi0 ${STORAGE}:vm-"$worker2_vmid"-disk-0,iothread=1 \
     --ostype l26 \
     --boot order=scsi0 \
-    --agent enabled=1 &> /tmp/pve_vm_manager.log
-
+    --agent enabled=1 && \
     qm resize $worker2_vmid scsi0 ${DISK}G
-    qm start $worker2_vmid
 EOF
   [[ "$?" == "0" ]] && printf "${GRN}=====Create $worker2_vmid success=====${NC}\n"
-
 }
 
-#Debug
-source ./setenvVar
-check_env
-create_vm
+log_vm() {
+  if [[ ! -f '/tmp/pve_vm_manager.log' ]]; then
+    printf "${RED}=====log not found=====${NC}\n"
+    exit 1
+  else
+    cat /tmp/pve_vm_manager.log
+  fi
+}
+
+debug_vm() {
+  if [[ ! -f '/tmp/pve_execute_command.log' ]]; then
+    printf "${RED}=====log not found=====${NC}\n"
+    exit 1
+  else
+    cat /tmp/pve_execute_command.log
+  fi
+}
+
+start_vm() {
+  mgid=$(echo $VM_mgmt | cut -d ':' -f1)
+  master_vmid=$(echo $VM_list | cut -d ' ' -f1 | cut -d ':' -f2)
+  worker1_vmid=$(echo $VM_list | cut -d ' ' -f2 | cut -d ':' -f2)
+  worker2_vmid=$(echo $VM_list | cut -d ' ' -f3 | cut -d ':' -f2)
+  printf "${GRN}[Stage: Start VM]${NC}\n"
+
+  for d in $mgid $master_vmid $worker1_vmid $worker2_vmid
+  do
+    if ! ssh -q -o "StrictHostKeyChecking no" root@"$EXECUTE_NODE" qm list | grep "$d" &>/dev/null; then
+      printf "${RED}=====vm $d not found=====${NC}\n"
+    else
+      ssh root@"$EXECUTE_NODE" qm start "$d" &>> /tmp/pve_vm_manager.log
+      sleep 10
+      printf "${GRN}=====start vm $d=====${NC}\n"
+    fi
+  done
+}
+
+stop_vm() {
+  mgid=$(echo $VM_mgmt | cut -d ':' -f1)
+  master_vmid=$(echo $VM_list | cut -d ' ' -f1 | cut -d ':' -f2)
+  worker1_vmid=$(echo $VM_list | cut -d ' ' -f2 | cut -d ':' -f2)
+  worker2_vmid=$(echo $VM_list | cut -d ' ' -f3 | cut -d ':' -f2)
+  printf "${GRN}[Stage: Stop VM]${NC}\n"
+  for e in $mgid $master_vmid $worker1_vmid $worker2_vmid
+  do
+    if ! ssh -q -o "StrictHostKeyChecking no" root@"$EXECUTE_NODE" qm list | grep "$e" &>/dev/null; then
+      printf "${RED}=====vm $e not found=====${NC}\n"
+    else
+      ssh root@"$EXECUTE_NODE" qm stop "$e" &>> /tmp/pve_vm_manager.log
+      printf "${GRN}=====stop vm $e completed=====${NC}\n"
+    fi
+  done
+}
+
+deploy_vm() {
+  mgid=$(echo $VM_mgmt | cut -d ':' -f1)
+  master_vmid=$(echo $VM_list | cut -d ' ' -f1 | cut -d ':' -f2)
+  master_ip=$(echo $VM_list | cut -d ' ' -f1 | cut -d ':' -f3)
+  worker1_vmid=$(echo $VM_list | cut -d ' ' -f2 | cut -d ':' -f2)
+  worker1_ip=$(echo $VM_list | cut -d ' ' -f2 | cut -d ':' -f3)
+  worker2_vmid=$(echo $VM_list | cut -d ' ' -f3 | cut -d ':' -f2)
+  worker2_ip=$(echo $VM_list | cut -d ' ' -f3 | cut -d ':' -f3)
+
+  ### check command
+  if ! which sshpass &>/dev/null; then
+    printf "${RED}=====sshpass command not found,please install on localhost=====${NC}\n"
+  exit 1
+  fi
+
+  ### check alp-tkadm-env.sh file
+  if [[ ! -f ./alp-tkadm-env.sh ]]; then
+    printf "${RED}=====alp-tkadm-env.sh file not found=====${NC}\n"
+    exit 1
+  fi
+  sleep 60
+
+  sshpass -p "$PASSWORD" scp -o "StrictHostKeyChecking no" -o ConnectTimeout=5 ./alp-tkadm-env.sh "$USER"@"$VM_netid.$a":/home/"$USER"/alp-tkadm-env.sh &>> /tmp/pve_vm_manager.log && \
+  sshpass -p "$PASSWORD" ssh "$USER"@"$VM_netid.$a" bash /home/"$USER"/alp-tkadm-env.sh &>> /tmp/pve_vm_manager.log && \
+  sshpass -p "$PASSWORD" ssh "$USER"@"$VM_netid.$a" rm /home/"$USER"/alp-tkadm-env.sh
+
+  if [[ "$?" == "0" ]]; then
+    printf "${GRN}=====create talos management TKAdm-$z success=====${NC}\n"
+    printf "${GRN}=====vm TKAdm-$z is rebooting=====${NC}\n"
+  else
+    printf "${RED}=====create talos management TKAdm-$z fail=====${NC}\n"
+    exit 1
+  fi
+}
+
+help() {
+  cat <<EOF
+Usage: pve_taroko_manager.sh [OPTIONS]
+
+Available options:
+
+create        create the vm based on the setenvVar parameter.
+start         start all vm.
+stop          stop all vm.
+deploy        deploy taroko k8s environment to the vm.
+logs          show the complete execution process log.
+debug         show execute command log.
+EOF
+  exit
+}
+
+if [[ "$#" < 1 ]]; then
+  help
+else
+  case $1 in
+    create)
+      Debug
+      source ./setenvVar
+      [[ -f /tmp/pve_vm_manager.log ]] && rm /tmp/pve_vm_manager.log
+      check_env
+      create_vm
+    ;;
+    start)
+      Debug
+      source ./setenvVar
+      [[ -f /tmp/pve_vm_manager.log ]] && rm /tmp/pve_vm_manager.log
+      start_vm
+    ;;
+    stop)
+      Debug
+      source ./setenvVar
+      [[ -f /tmp/pve_vm_manager.log ]] && rm /tmp/pve_vm_manager.log
+      stop_vm
+    deploy)
+      Debug
+      source ./setenvVar
+      [[ -f /tmp/pve_vm_manager.log ]] && rm /tmp/pve_vm_manager.log
+      deploy_vm
+    ;;
+    logs)
+      log_vm
+    ;;
+    debug)
+      debug_vm
+    ;;
+    *)
+      help
+    ;;
+  esac
+fi
