@@ -22,11 +22,13 @@ sudo rm -r kubectl
 sudo curl https://dl.min.io/client/mc/release/linux-amd64/mc -o /usr/bin/mc
 sudo chmod +x /usr/bin/mc
 
-mkdir ~/cni/ && \
-curl -sL "$(curl -sL https://api.github.com/repos/containernetworking/plugins/releases/latest | jq -r '.assets[].browser_download_url' | grep 'linux-amd64.*.tgz$')" -o ~/cni/cni-plugins.tgz && \
-tar xf ~/cni/cni-plugins.tgz -C ~/cni; rm ~/cni/cni-plugins.tgz
+wget --save-cookies cookies.txt 'https://docs.google.com/uc?export=download&id=18F89F-SDhEe0lz29zvSxnK4KMQpr-9Jd' -O- | sed -rn 's/.*name="uuid" value=\"([0-9A-Za-z_\-]+).*/\1/p' > google_uuid.txt
 
-wget https://raw.githubusercontent.com/braveantony/bash-script/main/kind/kindctl -O ~/bin/kindctl && chmod +x ~/bin/kindctl
+wget --load-cookies cookies.txt -O wulin.k1.tar.gz2 'https://drive.usercontent.google.com/download?export=download&id=18F89F-SDhEe0lz29zvSxnK4KMQpr-9Jd&confirm=t&uuid='$(<google_uuid.txt)
+
+tar -jxvf wulin.k1.tar.gz2
+
+sudo rm -r cookies.txt google_uuid.txt wulin.k1.tar.gz2
 
 cat <<EOF | sudo tee /etc/profile
 #!/bin/bash
