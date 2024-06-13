@@ -300,6 +300,4 @@ tty6::respawn:/sbin/getty 38400 tty6
 ttyS0::respawn:/bin/login -f $USER
 EOF
 
-
-
 sudo reboot
