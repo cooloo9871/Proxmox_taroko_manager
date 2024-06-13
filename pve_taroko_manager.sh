@@ -367,6 +367,7 @@ Available options:
 create        create the vm based on the setenvVar parameter.
 start         start all vm.
 stop          stop all vm.
+delete        delete all vm.
 deploy        deploy taroko k8s environment to the vm.
 logs          show the complete execution process log.
 debug         show execute command log.
