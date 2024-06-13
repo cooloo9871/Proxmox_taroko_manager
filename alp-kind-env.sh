@@ -1,7 +1,5 @@
 #!/bin/bash
 
-sudo apk update;sudo apk upgrade
-
 sudo apk add tree unzip open-vm-tools pciutils curl wget zip grep bash procps util-linux-misc dialog go udev jq sudo iproute2 net-tools aardvark-dns util-linux openrc alpine-base alpine-conf alpine-keys alsa-lib apk-tools argon2 autologin binutils bridge bridge-utils brotli c-ares capstone catatonit conmon containers-common crun cryptsetup lvm2 elinks encodings ethtool file findutils font-dejavu fontconfig fping freetype fstrm fts fuse gcc gcompat gdbm giflib glib gmp gnutls gpgme gnupg gpm hwids isl26 jansson java-cacerts java-common java-jffi json-c k9s keyutils krb5-conf krb5 kubernetes lcms2 lddtree acl libaio libassuan attr libbpf libbsd bzip2 libc-dev libcap-ng e2fsprogs openssl libeconf libedit elfutils expat libffi libfontenc libgcrypt libgpg-error libidn2 gettext libjpeg-turbo libksba openldap lksctp-tools libmd libmnl ncurses libnftnl libpng procps-ng cyrus-sasl libseccomp libslirp libtasn1 libucontext libunistring liburing libutempter libuv libverto libx11 libxau libxcb libxcomposite libxdmcp libxext libxi libxml2 libxrender iptables libxtst linux-pam linux-lts lz4 lzo mdev-conf mkfontscale mkinitfs mpc1 mpdecimal mpfr4 mtools musl-obstack musl mariadb nano netavark nettle nghttp2 npth nspr nss numactl oniguruma openblas pcre2 pcsc-lite perl perl-error git pinentry pixman pkgconf protobuf-c readline pax-utils screen skalibs slirp4netns snappy sqlite sshpass busybox syslinux utmps vde2 xz yajl zlib zstd agetty podman
 
 sudo rc-update add local
