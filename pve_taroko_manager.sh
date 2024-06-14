@@ -87,7 +87,12 @@ check_env() {
     exit 1
   fi
 
-  if ! which podman >/dev/null; then
+  if ! which sshpass &>/dev/null; then
+    printf "${RED}=====sshpass command not found,please install on localhost=====${NC}\n"
+  exit 1
+  fi
+  
+  if ! which podman &>/dev/null; then
     printf "${RED}=====Please install podman on localhost=====${NC}\n"
     exit 1
   else
