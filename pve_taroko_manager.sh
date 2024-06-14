@@ -294,6 +294,7 @@ deploy_vm() {
   export worker1_ip=$(echo $VM_list | cut -d ' ' -f2 | cut -d ':' -f3)
   export worker2_vmid=$(echo $VM_list | cut -d ' ' -f3 | cut -d ':' -f2)
   export worker2_ip=$(echo $VM_list | cut -d ' ' -f3 | cut -d ':' -f3)
+  export tv=$(echo $Talos_OS_Version | cut -d 'v' -f2)
 
   printf "${GRN}[Stage: Deploy talos k8s environment to the TKAdm-$mgid]${NC}\n"
   ### check command
