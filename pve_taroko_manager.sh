@@ -116,7 +116,7 @@ create_vm() {
       if [[ "$?" != '0' ]]; then
         printf "${RED}=====download cloud init image fail=====${NC}\n" && exit 1
       fi
-      virt-customize --install qemu-guest-agent,bash,sudo -a /var/vmimg/nocloud_alpine-3.19.1-x86_64-bios-cloudinit-r0.qcow2
+      virt-customize --install qemu-guest-agent,bash,sudo,wget -a /var/vmimg/nocloud_alpine-3.19.1-x86_64-bios-cloudinit-r0.qcow2
     fi
 EOF
 
@@ -156,15 +156,15 @@ EOF
   do
     ip=$(echo $s | cut -d ' ' -f1 | cut -d ':' -f3)
     hostname=$(echo $s | cut -d ':' -f1)
-    sudo podman run --rm -t -v $PWD/out:/out  -v /dev:/dev --privileged ghcr.io/siderolabs/imager:"$Talos_OS_Version" metal \
+    sudo podman run --rm -t -v "$PWD"/out:/out  -v /dev:/dev --privileged ghcr.io/siderolabs/imager:"$Talos_OS_Version" metal \
     --system-extension-image ghcr.io/siderolabs/qemu-guest-agent:"$Qemu_Agent_Version" \
     --extra-kernel-arg "ip=$VM_netid.$ip::$GATEWAY:$NETMASK:$hostname:eth0:off:$NAMESERVER net.ifnames=0" &>> /tmp/pve_vm_manager.log
 
     sudo chown -R $(id -u):$(id -g) out &>> /tmp/pve_vm_manager.log
-    xz -v -d $PWD/out/metal-amd64.raw.xz &>> /tmp/pve_vm_manager.log
-    mv $PWD/out/metal-amd64.raw $PWD/out/talos-$hostname.$ip.raw &>> /tmp/pve_vm_manager.log
+    xz -v -d "$PWD"/out/metal-amd64.raw.xz &>> /tmp/pve_vm_manager.log
+    mv "$PWD"/out/metal-amd64.raw "$PWD"/out/talos-"$hostname.$ip".raw &>> /tmp/pve_vm_manager.log
 
-    scp -q $PWD/out/talos-$hostname.$ip.raw root@$EXECUTE_NODE:/var/vmimg/ &>> /tmp/pve_vm_manager.log
+    scp -q "$PWD"/out/talos-"$hostname.$ip".raw root@"$EXECUTE_NODE":/var/vmimg/ &>> /tmp/pve_vm_manager.log
     if [[ "$?" == '0' ]]; then
       printf "${GRN}=====talos-$hostname.$ip.raw create success=====${NC}\n"
     else
@@ -185,48 +185,51 @@ EOF
   worker2_ip=$(echo $VM_list | cut -d ' ' -f3 | cut -d ':' -f3)
 
   ssh root@"$EXECUTE_NODE" /bin/bash << EOF &>> /tmp/pve_vm_manager.log
-    qm create $master_vmid && \
-    qm importdisk $master_vmid /var/vmimg/talos-$master_name.$master_ip.raw ${STORAGE} && \
-    qm set $master_vmid \
-    --name $master_name \
-    --cpu $CPU_type --cores $CPU_core --sockets $CPU_socket \
-    --memory $MEM \
+    qm create "$master_vmid" && \
+    qm importdisk "$master_vmid" /var/vmimg/talos-"$master_name.$master_ip".raw ${STORAGE} && \
+    qm set "$master_vmid" \
+    --name "$master_name" \
+    --cpu "$CPU_type" --cores "$CPU_core" --sockets "$CPU_socket" \
+    --memory "$MEM" \
     --net0 bridge="$Network_device",virtio,firewall=1 \
     --scsihw virtio-scsi-single \
-    --scsi0 ${STORAGE}:vm-"$master_vmid"-disk-0,iothread=1 \
+    --scsi0 "${STORAGE}":vm-"$master_vmid"-disk-0,iothread=1 \
     --ostype l26 \
     --boot order=scsi0 \
     --agent enabled=1 && \
-    qm resize $master_vmid scsi0 ${DISK}G
+    qm resize "$master_vmid" scsi0 +${DISK}G
 EOF
   [[ "$?" == "0" ]] && printf "${GRN}=====create $master_vmid success=====${NC}\n"
   ssh root@"$EXECUTE_NODE" /bin/bash << EOF &>> /tmp/pve_vm_manager.log
-    qm create $worker1_vmid && \
-    qm importdisk $worker1_vmid /var/vmimg/talos-$worker1_name.$worker1_ip.raw ${STORAGE} && \
-    qm set $worker1_vmid --name $worker1_name --cpu $CPU_type --cores $CPU_core --sockets $CPU_socket --memory $MEM \
+    qm create "$worker1_vmid" && \
+    qm importdisk "$worker1_vmid" /var/vmimg/talos-"$worker1_name.$worker1_ip".raw ${STORAGE} && \
+    qm set "$worker1_vmid" \
+    --name "$worker1_name" \
+    --cpu "$CPU_type" --cores "$CPU_core" --sockets "$CPU_socket" \
+    --memory "$MEM" \
     --net0 bridge="$Network_device",virtio,firewall=1 \
     --scsihw virtio-scsi-single \
-    --scsi0 ${STORAGE}:vm-"$worker1_vmid"-disk-0,iothread=1 \
+    --scsi0 "${STORAGE}":vm-"$worker1_vmid"-disk-0,iothread=1 \
     --ostype l26 \
     --boot order=scsi0 \
     --agent enabled=1 && \
-    qm resize $worker1_vmid scsi0 ${DISK}G
+    qm resize "$worker1_vmid" scsi0 +${DISK}G
 EOF
   [[ "$?" == "0" ]] && printf "${GRN}=====create $worker1_vmid success=====${NC}\n"
   ssh root@"$EXECUTE_NODE" /bin/bash << EOF &>> /tmp/pve_vm_manager.log
-    qm create $worker2_vmid && \
-    qm importdisk $worker2_vmid /var/vmimg/talos-$worker2_name.$worker2_ip.raw ${STORAGE} && \
-    qm set $worker2_vmid \
-    --name $worker2_name \
-    --cpu $CPU_type --cores $CPU_core --sockets $CPU_socket \
-    --memory $MEM \
+    qm create "$worker2_vmid" && \
+    qm importdisk "$worker2_vmid" /var/vmimg/talos-"$worker2_name.$worker2_ip".raw ${STORAGE} && \
+    qm set "$worker2_vmid" \
+    --name "$worker2_name" \
+    --cpu "$CPU_type" --cores "$CPU_core" --sockets "$CPU_socket" \
+    --memory "$MEM" \
     --net0 bridge="$Network_device",virtio,firewall=1 \
     --scsihw virtio-scsi-single \
-    --scsi0 ${STORAGE}:vm-"$worker2_vmid"-disk-0,iothread=1 \
+    --scsi0 "${STORAGE}":vm-"$worker2_vmid"-disk-0,iothread=1 \
     --ostype l26 \
     --boot order=scsi0 \
     --agent enabled=1 && \
-    qm resize $worker2_vmid scsi0 ${DISK}G
+    qm resize "$worker2_vmid" scsi0 +${DISK}G
 EOF
   [[ "$?" == "0" ]] && printf "${GRN}=====create $worker2_vmid success=====${NC}\n"
 }
@@ -318,6 +321,23 @@ deploy_vm() {
   done
   if [[ "$?" == "0" ]]; then
     sshpass -p "$PASSWORD" scp -o "StrictHostKeyChecking no" -o ConnectTimeout=5 ./alp-tkadm-env.sh "$USER"@"$VM_netid.$mgip":/home/"$USER"/alp-tkadm-env.sh &>> /tmp/pve_vm_manager.log && \
+    sshpass -p "$PASSWORD" ssh "$USER"@"$VM_netid.$mgip" /bin/bash << EOF &>> /tmp/pve_vm_manager.log && \
+      wget -q --save-cookies /home/"$USER"/cookies.txt 'https://docs.google.com/uc?export=download&id=18F89F-SDhEe0lz29zvSxnK4KMQpr-9Jd' -O- | sed -rn 's/.*name="uuid" value=\"([0-9A-Za-z_\-]+).*/\1/p' > /home/"$USER"/google_uuid.txt
+      wget --load-cookies /home/"$USER"/cookies.txt -O /home/"$USER"/wulin.k1.tar.gz2 'https://drive.usercontent.google.com/download?export=download&id=18F89F-SDhEe0lz29zvSxnK4KMQpr-9Jd&confirm=t&uuid='$(</home/"$USER"/google_uuid.txt)
+      tar -jxvf wulin.k1.tar.gz2
+      sudo rm -r cookies.txt google_uuid.txt wulin.k1.tar.gz2 &>> /dev/null
+      sed -i "s/172.22.1.11/$VM_netid.$master_ip/g" k1/*
+      sed -i "s/172.22.1.15/$VM_netid.$worker1_ip/g" k1/*
+      sed -i "s/172.22.1.16/$VM_netid.$worker2_ip/g" k1/*
+      sed -i "s/172.22.1.11/$VM_netid.$master_ip/g" k1/**/*
+      sed -i "s/172.22.1.15/$VM_netid.$worker1_ip/g" k1/**/*
+      sed -i "s/172.22.1.16/$VM_netid.$worker2_ip/g" k1/**/*
+      sed -i "s/172.22.1.11/$VM_netid.$master_ip/g" wulin/bin/*
+      sed -i "s/172.22.1.15/$VM_netid.$worker1_ip/g" wulin/bin/*
+      sed -i "s/172.22.1.16/$VM_netid.$worker2_ip/g" wulin/bin/*
+      sed -i "s/172.22.1.11/$VM_netid.$master_ip/g" wulin/images/**/Dockerfile
+      sed -i "s/172.22.1.11/$VM_netid.$master_ip/g" wulin/wkload/**/*.yaml
+EOF
     sshpass -p "$PASSWORD" ssh "$USER"@"$VM_netid.$mgip" bash /home/"$USER"/alp-tkadm-env.sh &>> /tmp/pve_vm_manager.log && \
     sshpass -p "$PASSWORD" ssh "$USER"@"$VM_netid.$mgip" rm /home/"$USER"/alp-tkadm-env.sh
     if [[ "$?" == "0" ]]; then
@@ -328,6 +348,25 @@ deploy_vm() {
       exit 1
     fi
   fi
+
+  sleep 40
+
+  printf "${GRN}[Stage: Snapshot the VM]${NC}\n"
+  for l in $mgid $master_vmid $worker1_vmid $worker2_vmid
+  do
+    if ! ssh root@"$EXECUTE_NODE" qm list | grep "$l" &>/dev/null; then
+      printf "${RED}=====vm $l not found=====${NC}\n"
+    elif ! ssh root@"$EXECUTE_NODE" qm list | grep "$l" | grep running &>/dev/null; then
+      printf "${RED}=====vm $l not running=====${NC}\n"
+    else
+      ssh root@"$EXECUTE_NODE" qm snapshot "$l" taroko-first-snapshot &>> /tmp/pve_vm_manager.log
+      if [[ "$?" == "0" ]]; then
+        printf "${GRN}=====snapshot vm $l completed=====${NC}\n"
+      else
+        printf "${RED}=====snapshot vm $l fail=====${NC}\n"
+      fi
+    fi
+  done
 }
 
 delete_vm() {
