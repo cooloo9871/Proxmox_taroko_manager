@@ -91,7 +91,7 @@ check_env() {
     printf "${RED}=====sshpass command not found,please install on localhost=====${NC}\n"
   exit 1
   fi
-  
+
   if ! which podman &>/dev/null; then
     printf "${RED}=====Please install podman on localhost=====${NC}\n"
     exit 1
@@ -199,8 +199,7 @@ EOF
     --agent enabled=1 && \
     qm resize $master_vmid scsi0 ${DISK}G
 EOF
-
-  [[ "$?" == "0" ]] && printf "${GRN}=====Create $master_vmid success=====${NC}\n"
+  [[ "$?" == "0" ]] && printf "${GRN}=====create $master_vmid success=====${NC}\n"
   ssh root@"$EXECUTE_NODE" /bin/bash << EOF &>> /tmp/pve_vm_manager.log
     qm create $worker1_vmid && \
     qm importdisk $worker1_vmid /var/vmimg/talos-$worker1_name.$worker1_ip.raw ${STORAGE} && \
@@ -213,8 +212,7 @@ EOF
     --agent enabled=1 && \
     qm resize $worker1_vmid scsi0 ${DISK}G
 EOF
-
-  [[ "$?" == "0" ]] && printf "${GRN}=====Create $worker1_vmid success=====${NC}\n"
+  [[ "$?" == "0" ]] && printf "${GRN}=====create $worker1_vmid success=====${NC}\n"
   ssh root@"$EXECUTE_NODE" /bin/bash << EOF &>> /tmp/pve_vm_manager.log
     qm create $worker2_vmid && \
     qm importdisk $worker2_vmid /var/vmimg/talos-$worker2_name.$worker2_ip.raw ${STORAGE} && \
@@ -230,7 +228,7 @@ EOF
     --agent enabled=1 && \
     qm resize $worker2_vmid scsi0 ${DISK}G
 EOF
-  [[ "$?" == "0" ]] && printf "${GRN}=====Create $worker2_vmid success=====${NC}\n"
+  [[ "$?" == "0" ]] && printf "${GRN}=====create $worker2_vmid success=====${NC}\n"
 }
 
 log_vm() {
@@ -288,14 +286,14 @@ stop_vm() {
 }
 
 deploy_vm() {
-  mgid=$(echo $VM_mgmt | cut -d ':' -f1)
-  mgip=$(echo $VM_mgmt | cut -d ':' -f2)
-  master_vmid=$(echo $VM_list | cut -d ' ' -f1 | cut -d ':' -f2)
-  master_ip=$(echo $VM_list | cut -d ' ' -f1 | cut -d ':' -f3)
-  worker1_vmid=$(echo $VM_list | cut -d ' ' -f2 | cut -d ':' -f2)
-  worker1_ip=$(echo $VM_list | cut -d ' ' -f2 | cut -d ':' -f3)
-  worker2_vmid=$(echo $VM_list | cut -d ' ' -f3 | cut -d ':' -f2)
-  worker2_ip=$(echo $VM_list | cut -d ' ' -f3 | cut -d ':' -f3)
+  export mgid=$(echo $VM_mgmt | cut -d ':' -f1)
+  export mgip=$(echo $VM_mgmt | cut -d ':' -f2)
+  export master_vmid=$(echo $VM_list | cut -d ' ' -f1 | cut -d ':' -f2)
+  export master_ip=$(echo $VM_list | cut -d ' ' -f1 | cut -d ':' -f3)
+  export worker1_vmid=$(echo $VM_list | cut -d ' ' -f2 | cut -d ':' -f2)
+  export worker1_ip=$(echo $VM_list | cut -d ' ' -f2 | cut -d ':' -f3)
+  export worker2_vmid=$(echo $VM_list | cut -d ' ' -f3 | cut -d ':' -f2)
+  export worker2_ip=$(echo $VM_list | cut -d ' ' -f3 | cut -d ':' -f3)
 
   printf "${GRN}[Stage: Deploy talos k8s environment to the TKAdm-$mgid]${NC}\n"
   ### check command
@@ -372,8 +370,8 @@ Available options:
 create        create the vm based on the setenvVar parameter.
 start         start all vm.
 stop          stop all vm.
-delete        delete all vm.
 deploy        deploy taroko k8s environment to the vm.
+delete        delete all vm.
 logs          show the complete execution process log.
 debug         show execute command log.
 EOF
