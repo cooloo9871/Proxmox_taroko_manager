@@ -312,9 +312,9 @@ EOF
 
 talosctl gen secrets -o /home/$USER/k1/v1.6.7/secrets.yaml
 talosctl gen config --with-secrets /home/$USER/k1/v1.6.7/secrets.yaml -o /home/$USER/k1/v1.6.7 k1 https://$VM_netid.$master_ip:6443 --force
-talosctl machineconfig patch /home/$USER/k1/v1.6.7/controlplane.yaml --patch @/home/$USER/k1/v1.6.7/k1m1.patch --output /home/$USER/k1/v1.6.7/m1k1.yaml
-talosctl machineconfig patch /home/$USER/k1/v1.6.7/worker.yaml --patch @/home/$USER/k1/v1.6.7/k1w1.patch --output /home/$USER/k1/v1.6.7/m1w1.yaml
-talosctl machineconfig patch /home/$USER/k1/v1.6.7/worker.yaml --patch @/home/$USER/k1/v1.6.7/k1w2.patch --output /home/$USER/k1/v1.6.7/m1w2.yaml
+talosctl machineconfig patch /home/$USER/k1/v1.6.7/controlplane.yaml --patch @/home/$USER/k1/v1.6.7/k1m1.patch --output /home/$USER/k1/v1.6.7/k1m1.yaml
+talosctl machineconfig patch /home/$USER/k1/v1.6.7/worker.yaml --patch @/home/$USER/k1/v1.6.7/k1w1.patch --output /home/$USER/k1/v1.6.7/k1w1.yaml
+talosctl machineconfig patch /home/$USER/k1/v1.6.7/worker.yaml --patch @/home/$USER/k1/v1.6.7/k1w2.patch --output /home/$USER/k1/v1.6.7/k1w2.yaml
 
 rm /home/"$USER"/envVar
 
