@@ -18,7 +18,7 @@ export EXECUTE_NODE="p3"
 # Set VM Network Env
 # Please make sure that the vm id and vm ip is not conflicting.
 export VM_mgmt="600:30"
-export VM_list="andy-m1:601:31 andy-w1:602:32 andy-w2:603:33"
+export VM_list="k1m1:601:31 k1w1:602:32 k1w2:603:33"
 export VM_netid="192.168.61"
 export NETMASK="255.255.255.0"
 export GATEWAY="192.168.61.2"
@@ -36,7 +36,7 @@ export Network_device="vmbr0"
 export DISK="50"
 export STORAGE="local-lvm"
 
-# Set TKAdm default user
+# Set alpine default user
 export USER="bigred"
 export PASSWORD="bigred"
 ```
