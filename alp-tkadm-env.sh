@@ -16,6 +16,8 @@ curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stabl
 sudo install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl && \
 sudo rm -r kubectl
 
+curl -sL https://talos.dev/install | sh
+
 sudo curl https://dl.min.io/client/mc/release/linux-amd64/mc -o /usr/bin/mc
 sudo chmod +x /usr/bin/mc
 
