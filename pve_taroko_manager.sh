@@ -326,17 +326,11 @@ deploy_vm() {
       wget --load-cookies /home/"$USER"/cookies.txt -O /home/"$USER"/wulin.k1.tar.gz2 'https://drive.usercontent.google.com/download?export=download&id=18F89F-SDhEe0lz29zvSxnK4KMQpr-9Jd&confirm=t&uuid='$(</home/"$USER"/google_uuid.txt)
       tar -jxvf wulin.k1.tar.gz2
       sudo rm -r cookies.txt google_uuid.txt wulin.k1.tar.gz2 &>> /dev/null
-      sed -i "s/172.22.1.11/$VM_netid.$master_ip/g" k1/*
-      sed -i "s/172.22.1.15/$VM_netid.$worker1_ip/g" k1/*
-      sed -i "s/172.22.1.16/$VM_netid.$worker2_ip/g" k1/*
-      sed -i "s/172.22.1.11/$VM_netid.$master_ip/g" k1/**/*
-      sed -i "s/172.22.1.15/$VM_netid.$worker1_ip/g" k1/**/*
-      sed -i "s/172.22.1.16/$VM_netid.$worker2_ip/g" k1/**/*
-      sed -i "s/172.22.1.11/$VM_netid.$master_ip/g" wulin/bin/*
-      sed -i "s/172.22.1.15/$VM_netid.$worker1_ip/g" wulin/bin/*
-      sed -i "s/172.22.1.16/$VM_netid.$worker2_ip/g" wulin/bin/*
-      sed -i "s/172.22.1.11/$VM_netid.$master_ip/g" wulin/images/**/Dockerfile
-      sed -i "s/172.22.1.11/$VM_netid.$master_ip/g" wulin/wkload/**/*.yaml
+      echo "export VM_netid="$VM_netid"" >> /home/"$USER"/envVar
+      echo "export GATEWAY="$GATEWAY"" >> /home/"$USER"/envVar
+      echo "export master_ip="$master_ip"" >> /home/"$USER"/envVar
+      echo "export worker1_ip="$worker1_ip"" >> /home/"$USER"/envVar
+      echo "export worker2_ip="$worker2_ip"" >> /home/"$USER"/envVar
 EOF
     sshpass -p "$PASSWORD" ssh "$USER"@"$VM_netid.$mgip" bash /home/"$USER"/alp-tkadm-env.sh &>> /tmp/pve_vm_manager.log && \
     sshpass -p "$PASSWORD" ssh "$USER"@"$VM_netid.$mgip" rm /home/"$USER"/alp-tkadm-env.sh
