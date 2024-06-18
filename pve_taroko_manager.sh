@@ -263,6 +263,9 @@ start_vm() {
   do
     if ! ssh -q -o "StrictHostKeyChecking no" root@"$EXECUTE_NODE" qm list | grep "$d" &>/dev/null; then
       printf "${RED}=====vm $d not found=====${NC}\n"
+    elif
+      ssh -q -o "StrictHostKeyChecking no" root@"$EXECUTE_NODE" qm list | grep "$d" | grep 'running' &>/dev/null; then
+      printf "${YEL}=====vm $d already running=====${NC}\n"
     else
       ssh root@"$EXECUTE_NODE" qm start "$d" &>> /tmp/pve_vm_manager.log
       sleep 10
@@ -395,6 +398,23 @@ delete_vm() {
   printf "${GRN}=====delete /var/vmimg/talos-$worker2_name.$worker2_ip.raw completed=====${NC}\n"
 }
 
+reset_vm() {
+  master_vmid=$(echo $VM_list | cut -d ' ' -f1 | cut -d ':' -f2)
+  worker1_vmid=$(echo $VM_list | cut -d ' ' -f2 | cut -d ':' -f2)
+  worker2_vmid=$(echo $VM_list | cut -d ' ' -f3 | cut -d ':' -f2)
+  printf "${GRN}[Stage: Reset VM]${NC}\n"
+
+  for d in $master_vmid $worker1_vmid $worker2_vmid
+  do
+    if ! ssh -q -o "StrictHostKeyChecking no" root@"$EXECUTE_NODE" qm list | grep "$d" &>/dev/null; then
+      printf "${RED}=====vm $d not found=====${NC}\n"
+    else
+      ssh root@"$EXECUTE_NODE" qm rollback "$d" taroko-first-snapshot &>> /tmp/pve_vm_manager.log
+      printf "${GRN}=====reset vm $d completed=====${NC}\n"
+    fi
+  done
+}
+
 help() {
   cat <<EOF
 Usage: pve_taroko_manager.sh [OPTIONS]
@@ -406,6 +426,7 @@ start         start all vm.
 stop          stop all vm.
 deploy        deploy taroko k8s environment to the vm.
 delete        delete all vm.
+reset         reset taroko k8s vm.
 logs          show the complete execution process log.
 debug         show execute command log.
 EOF
@@ -445,6 +466,11 @@ else
       source ./setenvVar
       [[ -f /tmp/pve_vm_manager.log ]] && rm /tmp/pve_vm_manager.log
       delete_vm
+    ;;
+    reset)
+      source ./setenvVar
+      [[ -f /tmp/pve_vm_manager.log ]] && rm /tmp/pve_vm_manager.log
+      reset_vm
     ;;
     logs)
       log_vm
