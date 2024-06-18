@@ -325,8 +325,8 @@ deploy_vm() {
   if [[ "$?" == "0" ]]; then
     sshpass -p "$PASSWORD" scp -o "StrictHostKeyChecking no" -o ConnectTimeout=5 ./alp-tkadm-env.sh "$USER"@"$VM_netid.$mgip":/home/"$USER"/alp-tkadm-env.sh &>> /tmp/pve_vm_manager.log && \
     sshpass -p "$PASSWORD" ssh "$USER"@"$VM_netid.$mgip" /bin/bash << EOF &>> /tmp/pve_vm_manager.log && \
-      wget -q --save-cookies /home/"$USER"/cookies.txt 'https://docs.google.com/uc?export=download&id=1yfviZtZh58XOqvM3dZa3KDgpAOSt2rHk' -O- | sed -rn 's/.*name="uuid" value=\"([0-9A-Za-z_\-]+).*/\1/p' > /home/"$USER"/google_uuid.txt
-      wget --load-cookies /home/"$USER"/cookies.txt -O /home/"$USER"/wulin.k1.tar.gz2 'https://drive.usercontent.google.com/download?export=download&id=1yfviZtZh58XOqvM3dZa3KDgpAOSt2rHk&confirm=t&uuid='$(</home/"$USER"/google_uuid.txt)
+      wget -q --save-cookies /home/"$USER"/cookies.txt 'https://docs.google.com/uc?export=download&id=1FplccwmVPrxRRDbQIHgm0YaIzdpqoW27' -O- | sed -rn 's/.*name="uuid" value=\"([0-9A-Za-z_\-]+).*/\1/p' > /home/"$USER"/google_uuid.txt
+      wget --load-cookies /home/"$USER"/cookies.txt -O /home/"$USER"/wulin.k1.tar.gz2 'https://drive.usercontent.google.com/download?export=download&id=1FplccwmVPrxRRDbQIHgm0YaIzdpqoW27&confirm=t&uuid='$(</home/"$USER"/google_uuid.txt)
       tar -jxvf wulin.k1.tar.gz2
       sudo rm -r cookies.txt google_uuid.txt wulin.k1.tar.gz2 &>> /dev/null
       echo "export VM_netid="$VM_netid"" >> /home/"$USER"/envVar
