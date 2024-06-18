@@ -85,7 +85,7 @@ echo ""
   #fi
 #fi
 
-export PS1="[\\${STY#*.}]\u@\h:\w\$ "
+export PS1="[\${STY#*.}]\u@\h:\w\$ "
 alias ping='ping -c 4 '
 alias pingdup='sudo arping -D -I eth0 -c 2 '
 alias dir='ls -alh '
@@ -312,7 +312,7 @@ EOF
 
 talosctl gen secrets -o /home/$USER/k1/v1.6.7/secrets.yaml
 talosctl gen config --with-secrets /home/$USER/k1/v1.6.7/secrets.yaml -o /home/$USER/k1/v1.6.7 k1 https://$VM_netid.$master_ip:6443 --force
-talosctl --talosconfig=./talosconfig config endpoint $VM_netid.$master_ip
+talosctl --talosconfig=/home/$USER/k1/v1.6.7/talosconfig config endpoint $VM_netid.$master_ip
 talosctl machineconfig patch /home/$USER/k1/v1.6.7/controlplane.yaml --patch @/home/$USER/k1/v1.6.7/k1m1.patch --output /home/$USER/k1/v1.6.7/k1m1.yaml
 talosctl machineconfig patch /home/$USER/k1/v1.6.7/worker.yaml --patch @/home/$USER/k1/v1.6.7/k1w1.patch --output /home/$USER/k1/v1.6.7/k1w1.yaml
 talosctl machineconfig patch /home/$USER/k1/v1.6.7/worker.yaml --patch @/home/$USER/k1/v1.6.7/k1w2.patch --output /home/$USER/k1/v1.6.7/k1w2.yaml
