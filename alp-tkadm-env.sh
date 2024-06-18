@@ -39,6 +39,7 @@ sed -i "s/172.22.1.16/$VM_netid.$worker2_ip/g" wulin/bin/*
 sed -i "s/172.22.1.11/$VM_netid.$master_ip/g" wulin/images/**/Dockerfile
 sed -i "s/172.22.1.11/$VM_netid.$master_ip/g" wulin/wkload/**/*.yaml
 sed -i "s/172.22.1/$VM_netid/g" wulin/wkload/**/**/*.yaml
+sed -i "s/172.22.1/$VM_netid/g" wulin/wkload/**/*.yaml
 
 cat <<EOF | sudo tee /etc/profile
 #!/bin/bash
@@ -113,7 +114,7 @@ export KUBE_EDITOR='nano'
 export TALOSCONFIG=/home/bigred/k1/v1.6.7/talosconfig
 export PATH=/home/bigred/wulin/bin:/home/bigred/k1:/home/bigred/.krew/bin:\$PATH
 
-#mc config host ls | grep mios &>/dev/null
+nc -w 1 $VM_netid.150 9000 && mc config host ls | grep mios &>/dev/null
 if [ "\$?" != "0" ]; then
    mc config host add mios http://$VM_netid.150:9000 minio minio123 &>/dev/null
    [ "\$?" == "0" ] && echo "mios ok"
