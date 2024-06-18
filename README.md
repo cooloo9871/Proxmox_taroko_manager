@@ -7,6 +7,12 @@
 git clone https://github.com/cooloo9871/Proxmox_taroko_manager.git;cd Proxmox_taroko_manager
 ```
 ### Setting the parameters
+- `VM_mgmt` is used to setting TKAdm VM id and VM ip.
+- `VM_list` is used to setting Taroko hostname,vm id and VM ip.
+- `VM_netid` is the network id used by the configured vm.
+- The vm ip addresses in the following example:
+  - TKAdm is 192.168.61.30
+  - Taroko vm ip range from 192.168.61.31 to 192.168.61.33.
 ```
 $ nano setenvVar
 # Set Proxmox Cluster Env
