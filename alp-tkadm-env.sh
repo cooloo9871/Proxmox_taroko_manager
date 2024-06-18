@@ -317,6 +317,13 @@ talosctl machineconfig patch /home/$USER/k1/v1.6.7/controlplane.yaml --patch @/h
 talosctl machineconfig patch /home/$USER/k1/v1.6.7/worker.yaml --patch @/home/$USER/k1/v1.6.7/k1w1.patch --output /home/$USER/k1/v1.6.7/k1w1.yaml
 talosctl machineconfig patch /home/$USER/k1/v1.6.7/worker.yaml --patch @/home/$USER/k1/v1.6.7/k1w2.patch --output /home/$USER/k1/v1.6.7/k1w2.yaml
 
+for dir in /home/$USER/k1/v1.6.7/k1m1.yaml /home/$USER/k1/v1.6.7/k1w1.yaml /home/$USER/k1/v1.6.7/k1w2.yaml
+do
+  count=$(cat -b $dir | grep hostDNS: | tr -s \ - | cut -d ' ' -f2 | tr -d ' ')
+  sed -i "$count"d $dir
+  sed -i "$count"d $dir
+done
+
 rm /home/"$USER"/envVar
 
 sudo reboot
