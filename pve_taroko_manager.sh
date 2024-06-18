@@ -158,7 +158,7 @@ EOF
     hostname=$(echo $s | cut -d ':' -f1)
     sudo podman run --rm -t -v "$PWD"/out:/out  -v /dev:/dev --privileged ghcr.io/siderolabs/imager:"$Talos_OS_Version" metal \
     --system-extension-image ghcr.io/siderolabs/qemu-guest-agent:"$Qemu_Agent_Version" \
-    --extra-kernel-arg "ip=$VM_netid.$ip::$GATEWAY:$NETMASK:$hostname:eth0:off:$NAMESERVER net.ifnames=0" &>> /tmp/pve_vm_manager.log
+    --extra-kernel-arg "ip=$VM_netid.$ip::$GATEWAY:$NETMASK:$hostname:eth0:off:$NAMESERVER::$NTP net.ifnames=0" &>> /tmp/pve_vm_manager.log
 
     sudo chown -R $(id -u):$(id -g) out &>> /tmp/pve_vm_manager.log
     xz -v -d "$PWD"/out/metal-amd64.raw.xz &>> /tmp/pve_vm_manager.log
