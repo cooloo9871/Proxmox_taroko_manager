@@ -38,7 +38,7 @@ sed -i "s/172.22.1.15/$VM_netid.$worker1_ip/g" wulin/bin/*
 sed -i "s/172.22.1.16/$VM_netid.$worker2_ip/g" wulin/bin/*
 sed -i "s/172.22.1.11/$VM_netid.$master_ip/g" wulin/images/**/Dockerfile
 sed -i "s/172.22.1.11/$VM_netid.$master_ip/g" wulin/wkload/**/*.yaml
-
+sed -i "s/172.22.1/$VM_netid/g" wulin/wkload/**/*.yaml
 
 cat <<EOF | sudo tee /etc/profile
 #!/bin/bash
