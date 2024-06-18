@@ -113,11 +113,11 @@ export KUBE_EDITOR='nano'
 export TALOSCONFIG=/home/bigred/k1/v1.6.7/talosconfig
 export PATH=/home/bigred/wulin/bin:/home/bigred/k1:/home/bigred/.krew/bin:\$PATH
 
-mc config host ls | grep mios &>/dev/null
-if [ "\$?" != "0" ]; then
-   mc config host add mios http://172.22.1.150:9000 minio minio123 &>/dev/null
-   [ "\$?" == "0" ] && echo "mios ok"
-fi
+#mc config host ls | grep mios &>/dev/null
+#if [ "\$?" != "0" ]; then
+#   mc config host add mios http://172.22.1.150:9000 minio minio123 &>/dev/null
+#   [ "\$?" == "0" ] && echo "mios ok"
+#fi
 
 # What is the difference between /tmp and /var/tmp?
 # https://unix.stackexchange.com/questions/30489/what-is-the-difference-between-tmp-and-var-tmp
