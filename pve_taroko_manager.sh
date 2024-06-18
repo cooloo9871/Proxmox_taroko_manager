@@ -343,7 +343,7 @@ EOF
     fi
   fi
 
-  sleep 40
+  sleep 60
 
   printf "${GRN}[Stage: Snapshot the VM]${NC}\n"
   for l in $mgid $master_vmid $worker1_vmid $worker2_vmid
