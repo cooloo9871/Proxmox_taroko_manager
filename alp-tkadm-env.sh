@@ -64,7 +64,7 @@ export GW=\$(route -n | grep -e '^0.0.0.0' | tr -s \ - | cut -d ' ' -f2)
 export PATH="/home/bigred/bin:/home/bigred/dt/bin:\$PATH"
 # source /home/bigred/bin/myk3s
 clear && sleep 2
-echo "Welcome to Talos Admin Console (Alpine Linux : `cat /etc/alpine-release`)"
+echo "Welcome to Talos Admin Console (Alpine Linux : \$(cat /etc/os-release | grep VERSION_ID | cut -d '=' -f2))"
 [ "\$IP" != "" ] && echo "IP : \$IP"
 echo ""
 
