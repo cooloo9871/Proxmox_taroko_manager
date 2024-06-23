@@ -189,15 +189,15 @@ EOF
     qm importdisk "$master_vmid" /var/vmimg/talos-"$master_name.$master_ip".raw ${STORAGE} && \
     qm set "$master_vmid" \
     --name "$master_name" \
-    --cpu "$CPU_type" --cores "$CPU_core" --sockets "$CPU_socket" \
-    --memory "$MEM" \
-    --net0 bridge="$Network_device",virtio,firewall=1 \
+    --cpu "$Taroko_CPU_type" --cores "$Taroko_CPU_core" --sockets "$Taroko_CPU_socket" \
+    --memory "$Taroko_MEM" \
+    --net0 bridge="$Taroko_Network_device",virtio,firewall=1 \
     --scsihw virtio-scsi-single \
-    --scsi0 "${STORAGE}":vm-"$master_vmid"-disk-0,iothread=1 \
+    --scsi0 "${Taroko_STORAGE}":vm-"$master_vmid"-disk-0,iothread=1 \
     --ostype l26 \
     --boot order=scsi0 \
     --agent enabled=1 && \
-    qm resize "$master_vmid" scsi0 +${DISK}G
+    qm resize "$master_vmid" scsi0 +${Taroko_DISK}G
 EOF
   [[ "$?" == "0" ]] && printf "${GRN}=====create $master_vmid success=====${NC}\n"
   ssh root@"$EXECUTE_NODE" /bin/bash << EOF &>> /tmp/pve_vm_manager.log
@@ -205,15 +205,15 @@ EOF
     qm importdisk "$worker1_vmid" /var/vmimg/talos-"$worker1_name.$worker1_ip".raw ${STORAGE} && \
     qm set "$worker1_vmid" \
     --name "$worker1_name" \
-    --cpu "$CPU_type" --cores "$CPU_core" --sockets "$CPU_socket" \
-    --memory "$MEM" \
-    --net0 bridge="$Network_device",virtio,firewall=1 \
+    --cpu "$Taroko_CPU_type" --cores "$Taroko_CPU_core" --sockets "$Taroko_CPU_socket" \
+    --memory "$Taroko_MEM" \
+    --net0 bridge="$Taroko_Network_device",virtio,firewall=1 \
     --scsihw virtio-scsi-single \
-    --scsi0 "${STORAGE}":vm-"$worker1_vmid"-disk-0,iothread=1 \
+    --scsi0 "${Taroko_STORAGE}":vm-"$worker1_vmid"-disk-0,iothread=1 \
     --ostype l26 \
     --boot order=scsi0 \
     --agent enabled=1 && \
-    qm resize "$worker1_vmid" scsi0 +${DISK}G
+    qm resize "$worker1_vmid" scsi0 +${Taroko_DISK}G
 EOF
   [[ "$?" == "0" ]] && printf "${GRN}=====create $worker1_vmid success=====${NC}\n"
   ssh root@"$EXECUTE_NODE" /bin/bash << EOF &>> /tmp/pve_vm_manager.log
@@ -221,15 +221,15 @@ EOF
     qm importdisk "$worker2_vmid" /var/vmimg/talos-"$worker2_name.$worker2_ip".raw ${STORAGE} && \
     qm set "$worker2_vmid" \
     --name "$worker2_name" \
-    --cpu "$CPU_type" --cores "$CPU_core" --sockets "$CPU_socket" \
-    --memory "$MEM" \
-    --net0 bridge="$Network_device",virtio,firewall=1 \
+    --cpu "$Taroko_CPU_type" --cores "$Taroko_CPU_core" --sockets "$Taroko_CPU_socket" \
+    --memory "$Taroko_MEM" \
+    --net0 bridge="$Taroko_Network_device",virtio,firewall=1 \
     --scsihw virtio-scsi-single \
-    --scsi0 "${STORAGE}":vm-"$worker2_vmid"-disk-0,iothread=1 \
+    --scsi0 "${Taroko_STORAGE}":vm-"$worker2_vmid"-disk-0,iothread=1 \
     --ostype l26 \
     --boot order=scsi0 \
     --agent enabled=1 && \
-    qm resize "$worker2_vmid" scsi0 +${DISK}G
+    qm resize "$worker2_vmid" scsi0 +${Taroko_DISK}G
 EOF
   [[ "$?" == "0" ]] && printf "${GRN}=====create $worker2_vmid success=====${NC}\n"
 }
