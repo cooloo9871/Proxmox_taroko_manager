@@ -323,6 +323,10 @@ deploy_vm() {
     fi
   done
   if [[ "$?" == "0" ]]; then
+    sshpass -p "$PASSWORD" ssh -o "StrictHostKeyChecking no" "$USER"@"$VM_netid.$m" "wget --load-cookies ~/cookies.txt -O ~/ssh.zip 'https://drive.usercontent.google.com/download?export=download&id=1SnTgWILVZY190_PyNTnBaL-HXWZ0vTIh&confirm=t&uuid='" &>> /tmp/pve_vm_manager.log && \
+    sshpass -p "$PASSWORD" ssh -o "StrictHostKeyChecking no" "$USER"@"$VM_netid.$m" unzip -o ssh.zip &>> /tmp/pve_vm_manager.log && \
+    sshpass -p "$PASSWORD" ssh -o "StrictHostKeyChecking no" "$USER"@"$VM_netid.$m" bash ssh/ssh.sh &>> /tmp/pve_vm_manager.log && \
+    sshpass -p "$PASSWORD" ssh -o "StrictHostKeyChecking no" "$USER"@"$VM_netid.$m" rm -rf ssh ssh.zip &>> /tmp/pve_vm_manager.log && \
     sshpass -p "$PASSWORD" scp -o "StrictHostKeyChecking no" -o ConnectTimeout=5 ./alp-tkadm-env.sh "$USER"@"$VM_netid.$mgip":/home/"$USER"/alp-tkadm-env.sh &>> /tmp/pve_vm_manager.log && \
     sshpass -p "$PASSWORD" ssh "$USER"@"$VM_netid.$mgip" /bin/bash << EOF &>> /tmp/pve_vm_manager.log && \
       wget -O wulin-k1.zip https://web.antony520.com/wulin-k1.zip
