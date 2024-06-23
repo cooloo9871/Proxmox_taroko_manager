@@ -23,7 +23,7 @@ export EXECUTE_NODE="p3"
 
 # Set VM Network Env
 # Please make sure that the vm id and vm ip is not conflicting.
-export VM_mgmt="600:30"
+export VM_tkadm="600:30"
 export VM_list="k1m1:601:31 k1w1:602:32 k1w2:603:33"
 export VM_netid="192.168.61"
 export NETMASK="255.255.255.0"
@@ -33,8 +33,8 @@ export Talos_OS_Version="v1.6.7"
 export Qemu_Agent_Version="8.2.3"
 
 
-# Set VM Hardware Env
-export CPU_socket="2"
+# Set TKAdm VM Hardware Env
+export CPU_socket="1"
 export CPU_core="2"
 export CPU_type="x86-64-v2"
 export MEM="4096"
@@ -42,7 +42,16 @@ export Network_device="vmbr0"
 export DISK="50"
 export STORAGE="local-lvm"
 
-# Set alpine default user
+# Set Taroko K8s VM Hardware Env
+export Taroko_CPU_socket="2"
+export Taroko_CPU_core="2"
+export Taroko_CPU_type="x86-64-v2"
+export Taroko_MEM="8192"
+export Taroko_Network_device="vmbr0"
+export Taroko_DISK="50"
+export Taroko_STORAGE="local-lvm"
+
+# Set TKAdm default user
 export USER="bigred"
 export PASSWORD="bigred"
 ```
