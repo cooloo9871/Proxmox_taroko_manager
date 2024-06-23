@@ -46,3 +46,29 @@ export STORAGE="local-lvm"
 export USER="bigred"
 export PASSWORD="bigred"
 ```
+
+### Create vm
+```
+$ bash pve_taroko_manager.sh create
+[Stage: Check Environment]
+=====Check Environment Success=====
+[Stage: Create Talos Management]
+=====create talos management TKAdm-600 success=====
+[Stage: Create Talos RAW Disk]
+=====talos-k1m1.31.raw create success=====
+=====talos-k1w1.32.raw create success=====
+=====talos-k1w2.33.raw create success=====
+=====[Stage: Create Talos VM]=====
+=====create 601 success=====
+=====create 602 success=====
+=====create 603 success=====
+```
+### Start vm
+```
+$ bash pve_taroko_manager.sh start
+[Stage: Start VM]
+=====start vm 600=====
+=====start vm 601=====
+=====start vm 602=====
+=====start vm 603=====
+```
