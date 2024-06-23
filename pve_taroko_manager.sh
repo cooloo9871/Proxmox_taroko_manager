@@ -329,7 +329,7 @@ deploy_vm() {
     sshpass -p "$PASSWORD" ssh -o "StrictHostKeyChecking no" "$USER"@"$VM_netid.$mgip" rm -rf ssh ssh.zip &>> /tmp/pve_vm_manager.log && \
     sshpass -p "$PASSWORD" scp -o "StrictHostKeyChecking no" -o ConnectTimeout=5 ./alp-tkadm-env.sh "$USER"@"$VM_netid.$mgip":/home/"$USER"/alp-tkadm-env.sh &>> /tmp/pve_vm_manager.log && \
     sshpass -p "$PASSWORD" ssh "$USER"@"$VM_netid.$mgip" /bin/bash << EOF &>> /tmp/pve_vm_manager.log && \
-      wget -q -O wulin-k1.zip https://web.antony520.com/wulin-k1.zip 
+      wget -q -O wulin-k1.zip https://web.antony520.com/wulin-k1.zip && \
       unzip wulin-k1.zip
       rm -rf wulin-k1.zip
       echo "export VM_netid="$VM_netid"" >> /home/"$USER"/envVar
