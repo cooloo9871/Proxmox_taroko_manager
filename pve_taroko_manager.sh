@@ -186,7 +186,7 @@ EOF
 
   ssh root@"$EXECUTE_NODE" /bin/bash << EOF &>> /tmp/pve_vm_manager.log
     qm create "$master_vmid" && \
-    qm importdisk "$master_vmid" /var/vmimg/talos-"$master_name.$master_ip".raw ${STORAGE} && \
+    qm importdisk "$master_vmid" /var/vmimg/talos-"$master_name.$master_ip".raw ${Taroko_STORAGE} && \
     qm set "$master_vmid" \
     --name "$master_name" \
     --cpu "$Taroko_CPU_type" --cores "$Taroko_CPU_core" --sockets "$Taroko_CPU_socket" \
@@ -202,7 +202,7 @@ EOF
   [[ "$?" == "0" ]] && printf "${GRN}=====create $master_vmid success=====${NC}\n"
   ssh root@"$EXECUTE_NODE" /bin/bash << EOF &>> /tmp/pve_vm_manager.log
     qm create "$worker1_vmid" && \
-    qm importdisk "$worker1_vmid" /var/vmimg/talos-"$worker1_name.$worker1_ip".raw ${STORAGE} && \
+    qm importdisk "$worker1_vmid" /var/vmimg/talos-"$worker1_name.$worker1_ip".raw ${Taroko_STORAGE} && \
     qm set "$worker1_vmid" \
     --name "$worker1_name" \
     --cpu "$Taroko_CPU_type" --cores "$Taroko_CPU_core" --sockets "$Taroko_CPU_socket" \
@@ -218,7 +218,7 @@ EOF
   [[ "$?" == "0" ]] && printf "${GRN}=====create $worker1_vmid success=====${NC}\n"
   ssh root@"$EXECUTE_NODE" /bin/bash << EOF &>> /tmp/pve_vm_manager.log
     qm create "$worker2_vmid" && \
-    qm importdisk "$worker2_vmid" /var/vmimg/talos-"$worker2_name.$worker2_ip".raw ${STORAGE} && \
+    qm importdisk "$worker2_vmid" /var/vmimg/talos-"$worker2_name.$worker2_ip".raw ${Taroko_STORAGE} && \
     qm set "$worker2_vmid" \
     --name "$worker2_name" \
     --cpu "$Taroko_CPU_type" --cores "$Taroko_CPU_core" --sockets "$Taroko_CPU_socket" \
