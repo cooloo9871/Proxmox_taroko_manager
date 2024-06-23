@@ -29,7 +29,6 @@ export VM_netid="192.168.61"
 export NETMASK="255.255.255.0"
 export GATEWAY="192.168.61.2"
 export NAMESERVER="8.8.8.8"
-export NTP="time.google.com"
 export Talos_OS_Version="v1.6.7"
 export Qemu_Agent_Version="8.2.3"
 
