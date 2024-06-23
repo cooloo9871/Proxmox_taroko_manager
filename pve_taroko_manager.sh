@@ -52,7 +52,7 @@ check_env() {
   fi
 
   ### check vm id
-  mgid=$(echo $VM_mgmt | cut -d ':' -f1)
+  mgid=$(echo $VM_tkadm | cut -d ':' -f1)
   taid1=$(echo $VM_list | cut -d ' ' -f1 | cut -d ':' -f2)
   taid2=$(echo $VM_list | cut -d ' ' -f2 | cut -d ':' -f2)
   taid3=$(echo $VM_list | cut -d ' ' -f3 | cut -d ':' -f2)
@@ -68,7 +68,7 @@ check_env() {
   done
 
   ### check vm ip
-  mgip=$(echo $VM_mgmt | cut -d ':' -f1)
+  mgip=$(echo $VM_tkadm | cut -d ':' -f1)
   taip1=$(echo $VM_list | cut -d ' ' -f1 | cut -d ':' -f2)
   taip2=$(echo $VM_list | cut -d ' ' -f2 | cut -d ':' -f2)
   taip3=$(echo $VM_list | cut -d ' ' -f3 | cut -d ':' -f2)
@@ -120,8 +120,8 @@ create_vm() {
     fi
 EOF
 
-  z=$(echo $VM_mgmt | cut -d ':' -f1)
-  a=$(echo $VM_mgmt | cut -d ':' -f2)
+  z=$(echo $VM_tkadm | cut -d ':' -f1)
+  a=$(echo $VM_tkadm | cut -d ':' -f2)
   if [[ "$?" == '0' ]]; then
     ssh root@"$EXECUTE_NODE" "qm create $z --name TKAdm-$z --memory $MEM --sockets $CPU_socket --cores $CPU_core --cpu $CPU_type --net0 virtio,bridge=$Network_device" &>> /tmp/pve_vm_manager.log
     ssh root@"$EXECUTE_NODE" "qm importdisk $z /var/vmimg/nocloud_alpine.qcow2 ${STORAGE}" &>> /tmp/pve_vm_manager.log
@@ -253,7 +253,7 @@ debug_vm() {
 }
 
 start_vm() {
-  mgid=$(echo $VM_mgmt | cut -d ':' -f1)
+  mgid=$(echo $VM_tkadm | cut -d ':' -f1)
   master_vmid=$(echo $VM_list | cut -d ' ' -f1 | cut -d ':' -f2)
   worker1_vmid=$(echo $VM_list | cut -d ' ' -f2 | cut -d ':' -f2)
   worker2_vmid=$(echo $VM_list | cut -d ' ' -f3 | cut -d ':' -f2)
@@ -275,7 +275,7 @@ start_vm() {
 }
 
 stop_vm() {
-  mgid=$(echo $VM_mgmt | cut -d ':' -f1)
+  mgid=$(echo $VM_tkadm | cut -d ':' -f1)
   master_vmid=$(echo $VM_list | cut -d ' ' -f1 | cut -d ':' -f2)
   worker1_vmid=$(echo $VM_list | cut -d ' ' -f2 | cut -d ':' -f2)
   worker2_vmid=$(echo $VM_list | cut -d ' ' -f3 | cut -d ':' -f2)
@@ -292,8 +292,8 @@ stop_vm() {
 }
 
 deploy_vm() {
-  export mgid=$(echo $VM_mgmt | cut -d ':' -f1)
-  export mgip=$(echo $VM_mgmt | cut -d ':' -f2)
+  export mgid=$(echo $VM_tkadm | cut -d ':' -f1)
+  export mgip=$(echo $VM_tkadm | cut -d ':' -f2)
   export master_vmid=$(echo $VM_list | cut -d ' ' -f1 | cut -d ':' -f2)
   export master_ip=$(echo $VM_list | cut -d ' ' -f1 | cut -d ':' -f3)
   export worker1_vmid=$(echo $VM_list | cut -d ' ' -f2 | cut -d ':' -f2)
@@ -366,7 +366,7 @@ EOF
 }
 
 delete_vm() {
-  mgid=$(echo $VM_mgmt | cut -d ':' -f1)
+  mgid=$(echo $VM_tkadm | cut -d ':' -f1)
   master_name=$(echo $VM_list | cut -d ' ' -f1 | cut -d ':' -f1)
   master_vmid=$(echo $VM_list | cut -d ' ' -f1 | cut -d ':' -f2)
   master_ip=$(echo $VM_list | cut -d ' ' -f1 | cut -d ':' -f3)
