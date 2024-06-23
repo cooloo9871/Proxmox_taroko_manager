@@ -26,13 +26,13 @@ export DISK="50"
 export STORAGE="local-lvm"
 
 # Set Taroko K8s VM Hardware Env
-export taroko_CPU_socket="2"
-export taroko_CPU_core="2"
-export taroko_CPU_type="x86-64-v2"
-export taroko_MEM="8192"
-export taroko_Network_device="vmbr0"
-export taroko_DISK="50"
-export taroko_STORAGE="local-lvm"
+export Taroko_CPU_socket="2"
+export Taroko_CPU_core="2"
+export Taroko_CPU_type="x86-64-v2"
+export Taroko_MEM="8192"
+export Taroko_Network_device="vmbr0"
+export Taroko_DISK="50"
+export Taroko_STORAGE="local-lvm"
 
 # Set TKAdm default user
 export USER="bigred"
