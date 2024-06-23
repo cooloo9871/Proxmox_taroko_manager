@@ -81,3 +81,29 @@ $ bash pve_taroko_manager.sh start
 =====start vm 602=====
 =====start vm 603=====
 ```
+### Stop vm
+```
+$ bash pve_taroko_manager.sh stop
+[Stage: Stop VM]
+=====stop vm 600 completed=====
+=====stop vm 601 completed=====
+=====stop vm 602 completed=====
+=====stop vm 603 completed=====
+```
+### Delete vm
+```
+$ bash pve_taroko_manager.sh delete
+[Stage: Delete VM]
+=====delete vm 600 completed=====
+=====delete vm 601 completed=====
+=====delete vm 602 completed=====
+=====delete vm 603 completed=====
+=====delete /tmp/pve_execute_command.log completed=====
+=====delete /tmp/pve_vm_manager.log completed=====
+=====delete nocloud_alpine.qcow2 completed=====
+=====delete cloud init yml completed=====
+=====delete /var/vmimg/talos-k1m1.31.raw completed=====
+=====delete /var/vmimg/talos-k1w1.32.raw completed=====
+=====delete /var/vmimg/talos-k1w2.33.raw completed=====
+```
+```
