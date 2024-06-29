@@ -52,6 +52,8 @@ sed -i "s/172.22.1.11/$VM_netid.$master_ip/g" wulin/wkload/**/*.yaml
 sed -i "s/172.22.1/$VM_netid/g" wulin/wkload/**/**/*.yaml
 sed -i "s/172.22.1/$VM_netid/g" wulin/wkload/**/*.yaml
 
+chmod +x ~/k1/1m2w.sh
+
 cat <<EOF | sudo tee /etc/profile
 #!/bin/bash
 export PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
