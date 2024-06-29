@@ -261,10 +261,10 @@ start_vm() {
 
   for d in $mgid $master_vmid $worker1_vmid $worker2_vmid
   do
-    if ! ssh -o "StrictHostKeyChecking no" root@"$EXECUTE_NODE" qm list | grep "$d" &>/dev/null; then
+    if ! ssh -q -o "StrictHostKeyChecking no" root@"$EXECUTE_NODE" qm list | grep "$d" &>/dev/null; then
       printf "${RED}=====vm $d not found=====${NC}\n"
     elif
-      ssh -o "StrictHostKeyChecking no" root@"$EXECUTE_NODE" qm list | grep "$d" | grep 'running' &>/dev/null; then
+      ssh -q -o "StrictHostKeyChecking no" root@"$EXECUTE_NODE" qm list | grep "$d" | grep 'running' &>/dev/null; then
       printf "${YEL}=====vm $d already running=====${NC}\n"
     else
       ssh root@"$EXECUTE_NODE" qm start "$d" &>> /tmp/pve_vm_manager.log
@@ -324,22 +324,23 @@ deploy_vm() {
   done
   if [[ "$?" == "0" ]]; then
     sshpass -p "$PASSWORD" ssh -o "StrictHostKeyChecking no" "$USER"@"$VM_netid.$mgip" "wget --load-cookies ~/cookies.txt -O ~/ssh.zip 'https://drive.usercontent.google.com/download?export=download&id=1SnTgWILVZY190_PyNTnBaL-HXWZ0vTIh&confirm=t&uuid='" &>> /tmp/pve_vm_manager.log && \
-    sshpass -p "$PASSWORD" ssh -o "StrictHostKeyChecking no" "$USER"@"$VM_netid.$mgip" unzip -o ssh.zip &>/dev/null && \
+    sshpass -p "$PASSWORD" ssh -o "StrictHostKeyChecking no" "$USER"@"$VM_netid.$mgip" unzip -o ssh.zip &>> /tmp/pve_vm_manager.log && \
     sshpass -p "$PASSWORD" ssh -o "StrictHostKeyChecking no" "$USER"@"$VM_netid.$mgip" bash ssh/ssh.sh &>> /tmp/pve_vm_manager.log && \
     sshpass -p "$PASSWORD" ssh -o "StrictHostKeyChecking no" "$USER"@"$VM_netid.$mgip" rm -rf ssh ssh.zip &>> /tmp/pve_vm_manager.log && \
     sshpass -p "$PASSWORD" ssh -o "StrictHostKeyChecking no" "$USER"@"$VM_netid.$mgip" wget -q -O wulin-k1.zip https://web.antony520.com/wulin-k1.zip && \
     sshpass -p "$PASSWORD" ssh -o "StrictHostKeyChecking no" "$USER"@"$VM_netid.$mgip" unzip wulin-k1.zip &>> /tmp/pve_vm_manager.log && \
-    sshpass -p "$PASSWORD" ssh -o "StrictHostKeyChecking no" "$USER"@"$VM_netid.$mgip" rm -rf wulin-k1.zip && \
-    sshpass -p "$PASSWORD" scp -o "StrictHostKeyChecking no" -o ConnectTimeout=5 ./alp-tkadm-env.sh "$USER"@"$VM_netid.$mgip":/home/"$USER"/alp-tkadm-env.sh &>> /tmp/pve_vm_manager.log && \
+    sshpass -p "$PASSWORD" ssh -o "StrictHostKeyChecking no" "$USER"@"$VM_netid.$mgip" rm -rf wulin-k1.zip &>> /tmp/pve_vm_manager.log && \
+    sshpass -p "$PASSWORD" scp -o "StrictHostKeyChecking no" -o ConnectTimeout=5 ./alp-tkadm-env.sh "$USER"@"$VM_netid.$mgip":~/alp-tkadm-env.sh &>> /tmp/pve_vm_manager.log && \
     sshpass -p "$PASSWORD" ssh "$USER"@"$VM_netid.$mgip" /bin/bash << EOF &>> /tmp/pve_vm_manager.log && \
-      echo "export VM_netid="$VM_netid"" >> /home/"$USER"/envVar
-      echo "export GATEWAY="$GATEWAY"" >> /home/"$USER"/envVar
-      echo "export master_ip="$master_ip"" >> /home/"$USER"/envVar
-      echo "export worker1_ip="$worker1_ip"" >> /home/"$USER"/envVar
-      echo "export worker2_ip="$worker2_ip"" >> /home/"$USER"/envVar
+      touch ~/envVar
+      echo "export VM_netid=$VM_netid" >> ~/envVar
+      echo "export GATEWAY=$GATEWAY" >> ~/envVar
+      echo "export master_ip=$master_ip" >> ~/envVar
+      echo "export worker1_ip=$worker1_ip" >> ~/envVar
+      echo "export worker2_ip=$worker2_ip" >> ~/envVar
 EOF
-    sshpass -p "$PASSWORD" ssh "$USER"@"$VM_netid.$mgip" bash /home/"$USER"/alp-tkadm-env.sh &>> /tmp/pve_vm_manager.log && \
-    sshpass -p "$PASSWORD" ssh "$USER"@"$VM_netid.$mgip" rm /home/"$USER"/alp-tkadm-env.sh
+    sshpass -p "$PASSWORD" ssh "$USER"@"$VM_netid.$mgip" bash ~/alp-tkadm-env.sh &>> /tmp/pve_vm_manager.log && \
+    sshpass -p "$PASSWORD" ssh "$USER"@"$VM_netid.$mgip" rm ~/alp-tkadm-env.sh
     if [[ "$?" == "0" ]]; then
       printf "${GRN}=====deploy talos management TKAdm-$mgid success=====${NC}\n"
       printf "${GRN}=====TKAdm-$mgid is rebooting=====${NC}\n"
