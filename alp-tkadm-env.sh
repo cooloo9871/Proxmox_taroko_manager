@@ -53,6 +53,7 @@ sed -i "s/172.22.1/$VM_netid/g" wulin/wkload/**/**/*.yaml
 sed -i "s/172.22.1/$VM_netid/g" wulin/wkload/**/*.yaml
 
 chmod +x ~/k1/1m2w.sh
+chmod +x ~/wulin/bin/deploy-base-img.sh
 
 cat <<EOF | sudo tee /etc/profile
 #!/bin/bash
