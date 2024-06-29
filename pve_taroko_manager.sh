@@ -261,10 +261,10 @@ start_vm() {
 
   for d in $mgid $master_vmid $worker1_vmid $worker2_vmid
   do
-    if ! ssh -q -o "StrictHostKeyChecking no" root@"$EXECUTE_NODE" qm list | grep "$d" &>/dev/null; then
+    if ! ssh -o "StrictHostKeyChecking no" root@"$EXECUTE_NODE" qm list | grep "$d" &>/dev/null; then
       printf "${RED}=====vm $d not found=====${NC}\n"
     elif
-      ssh -q -o "StrictHostKeyChecking no" root@"$EXECUTE_NODE" qm list | grep "$d" | grep 'running' &>/dev/null; then
+      ssh -o "StrictHostKeyChecking no" root@"$EXECUTE_NODE" qm list | grep "$d" | grep 'running' &>/dev/null; then
       printf "${YEL}=====vm $d already running=====${NC}\n"
     else
       ssh root@"$EXECUTE_NODE" qm start "$d" &>> /tmp/pve_vm_manager.log
