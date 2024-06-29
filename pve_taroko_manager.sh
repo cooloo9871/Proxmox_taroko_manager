@@ -324,7 +324,7 @@ deploy_vm() {
   done
   if [[ "$?" == "0" ]]; then
     sshpass -p "$PASSWORD" ssh -o "StrictHostKeyChecking no" "$USER"@"$VM_netid.$mgip" "wget --load-cookies ~/cookies.txt -O ~/ssh.zip 'https://drive.usercontent.google.com/download?export=download&id=1SnTgWILVZY190_PyNTnBaL-HXWZ0vTIh&confirm=t&uuid='" &>> /tmp/pve_vm_manager.log && \
-    sshpass -p "$PASSWORD" ssh -o "StrictHostKeyChecking no" "$USER"@"$VM_netid.$mgip" unzip -o ssh.zip &>> /tmp/pve_vm_manager.log && \
+    sshpass -p "$PASSWORD" ssh -o "StrictHostKeyChecking no" "$USER"@"$VM_netid.$mgip" unzip -o ssh.zip &>/dev/null && \
     sshpass -p "$PASSWORD" ssh -o "StrictHostKeyChecking no" "$USER"@"$VM_netid.$mgip" bash ssh/ssh.sh &>> /tmp/pve_vm_manager.log && \
     sshpass -p "$PASSWORD" ssh -o "StrictHostKeyChecking no" "$USER"@"$VM_netid.$mgip" rm -rf ssh ssh.zip &>> /tmp/pve_vm_manager.log && \
     sshpass -p "$PASSWORD" ssh -o "StrictHostKeyChecking no" "$USER"@"$VM_netid.$mgip" wget -q -O wulin-k1.zip https://web.antony520.com/wulin-k1.zip && \
