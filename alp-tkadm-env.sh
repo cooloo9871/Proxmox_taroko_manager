@@ -336,6 +336,6 @@ do
   sed -i "$count"d $dir
 done
 
-rm /home/"$USER"/envVar
+rm ~/envVar
 
 sudo reboot
