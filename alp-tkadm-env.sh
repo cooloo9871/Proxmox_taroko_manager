@@ -1,6 +1,6 @@
 #!/bin/bash
 
-source /home/"$USER"/envVar
+source ~/envVar
 
 cat <<EOF | sudo tee /etc/apk/repositories
 https://dl-cdn.alpinelinux.org/alpine/v3.20/main
